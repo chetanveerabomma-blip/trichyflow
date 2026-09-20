@@ -1,0 +1,234 @@
+/* ==============================================================================
+   TRICHYFLOW Map Styles: Custom Leaflet Elements & Visual Indicators
+   ============================================================================== */
+
+/* Leaflet Map Dark Styling Override */
+.leaflet-tile {
+  filter: brightness(0.65) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+}
+
+.leaflet-container {
+  background: #090f1d !important;
+  font-family: inherit;
+}
+
+/* Custom Junction Markers */
+.junction-marker {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+.junction-marker:hover {
+  transform: scale(1.35);
+  z-index: 1000 !important;
+}
+
+.marker-green {
+  background-color: #10B981;
+  box-shadow: 0 0 12px #10B981;
+}
+
+.marker-yellow {
+  background-color: #F59E0B;
+  box-shadow: 0 0 14px #F59E0B;
+}
+
+.marker-red {
+  background-color: #EF4444;
+  box-shadow: 0 0 16px #EF4444;
+}
+
+.marker-critical {
+  background-color: #B91C1C;
+  animation: pulseGlowRed 1.6s infinite;
+}
+
+/* Incident & Accident Marker */
+.accident-marker-icon {
+  width: 32px;
+  height: 32px;
+  background: #F97316;
+  border-radius: 50%;
+  border: 2px solid #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFF;
+  font-size: 14px;
+  animation: pulseGlowRed 1.8s infinite;
+  box-shadow: 0 0 15px #F97316;
+}
+
+/* Ambulance & Emergency Marker */
+.ambulance-marker-icon {
+  width: 36px;
+  height: 36px;
+  background: #DC2626;
+  border: 2px solid #FFFFFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 16px;
+  box-shadow: 0 0 20px #EF4444;
+  animation: pulseGlowBlue 1.2s infinite;
+}
+
+/* Hospital Marker */
+.hospital-marker-icon {
+  width: 28px;
+  height: 28px;
+  background: #2563EB;
+  border: 2px solid #FFFFFF;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 13px;
+  box-shadow: 0 0 12px #3B82F6;
+}
+
+/* Police Marker */
+.police-marker-icon {
+  width: 28px;
+  height: 28px;
+  background: #0284C7;
+  border: 2px solid #FFFFFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 12px;
+  box-shadow: 0 0 10px #0284C7;
+}
+
+/* Road Block Marker */
+.roadblock-marker-icon {
+  width: 30px;
+  height: 30px;
+  background: #1F2937;
+  border: 2px dashed #EF4444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #EF4444;
+  font-size: 14px;
+}
+
+/* Moving Traffic Vehicle Marker */
+.vehicle-moving-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FBBF24;
+  box-shadow: 0 0 8px #FBBF24;
+  pointer-events: none;
+  transition: transform 0.05s linear;
+}
+
+.vehicle-ambulance-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #EF4444;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 0 15px #EF4444;
+  pointer-events: none;
+}
+
+/* Emergency Green Corridor Glow Polylines */
+.emergency-corridor-glow {
+  stroke: #3B82F6 !important;
+  stroke-width: 10px !important;
+  stroke-opacity: 0.8 !important;
+  filter: drop-shadow(0 0 12px #2563EB);
+  stroke-dasharray: 12, 6;
+  animation: greenCorridorDash 1s linear infinite;
+}
+
+.emergency-corridor-core {
+  stroke: #60A5FA !important;
+  stroke-width: 4px !important;
+  stroke-opacity: 1 !important;
+}
+
+/* Road Block Polyline */
+.road-blocked-line {
+  stroke: #1F2937 !important;
+  stroke-width: 6px !important;
+  stroke-dasharray: 8, 8 !important;
+  stroke-opacity: 0.9 !important;
+}
+
+/* Custom Popup */
+.leaflet-popup-content-wrapper {
+  background: rgba(15, 23, 42, 0.96) !important;
+  backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255, 153, 51, 0.35) !important;
+  border-radius: 12px !important;
+  color: #F3F4F6 !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6) !important;
+}
+
+.leaflet-popup-tip {
+  background: rgba(15, 23, 42, 0.96) !important;
+}
+
+.junction-popup-box {
+  padding: 6px 2px;
+  min-width: 240px;
+}
+
+.popup-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 2px;
+}
+
+.popup-subtitle {
+  font-size: 0.72rem;
+  color: #9CA3AF;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+}
+
+.popup-metric-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  margin-bottom: 6px;
+}
+
+.popup-metric-label {
+  color: #9CA3AF;
+}
+
+.popup-metric-val {
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.popup-action-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  border-radius: 6px;
+}

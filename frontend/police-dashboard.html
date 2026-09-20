@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRICHYFLOW — Traffic Police Field Command Portal</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="top-nav">
+    <div class="brand-section">
+      <div class="brand-logo-circle">
+        <img src="assets/images/ashoka_chakra.svg" alt="Chakra" style="width: 28px; height: 28px;" class="animate-chakra">
+      </div>
+      <div>
+        <div class="brand-title">TRICHYFLOW POLICE</div>
+        <div class="brand-subtitle">Trichy City Traffic Police Field Operations Unit</div>
+      </div>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="nav-actions">
+      <div class="tricolour-pill">
+        <i class="fa fa-shield-alt text-primary"></i> Field Duty Active
+      </div>
+
+      <!-- User Profile Badge -->
+      <div class="user-profile-badge">
+        <i class="fa fa-user-shield" style="font-size: 1.4rem; color: #3b82f6;"></i>
+        <div>
+          <div id="navUserName" style="font-size: 0.82rem; font-weight: 700; color: #fff;">Inspector M. Anbarasan</div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span id="navUserRole" class="role-pill role-police">TRAFFIC POLICE</span>
+            <span id="navUserBadge" style="font-size: 0.68rem; color: #9ca3af;">TP-CHATH-42</span>
+          </div>
+        </div>
+      </div>
+
+      <a href="dashboard.html" class="btn-secondary-trichy" style="padding: 6px 12px; font-size: 0.8rem;" title="Switch to Control Room Map">
+        <i class="fa fa-desktop"></i> Control Centre
+      </a>
+
+      <!-- Logout Button -->
+      <button id="logoutBtn" class="btn-secondary-trichy" title="Sign Out" style="padding: 6px 10px;">
+        <i class="fa fa-sign-out-alt"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="tricolour-bar"></div>
+
+  <div class="container-fluid py-4 px-md-5">
+
+    <!-- Quick Action Police Buttons Row -->
+    <div class="glass-panel p-3 mb-4">
+      <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+        <div style="font-weight: 700; font-size: 0.9rem; color: #fff;">
+          <i class="fa fa-bolt text-warning me-1"></i> Quick Police Field Actions:
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <button class="btn-danger-trichy" onclick="openPoliceModal('accident')">
+            <i class="fa fa-car-crash"></i> Report Accident
+          </button>
+          <button class="btn-primary-trichy" onclick="openPoliceModal('roadblock')">
+            <i class="fa fa-road-barrier"></i> Report Road Block
+          </button>
+          <button class="btn-green-trichy" onclick="openPoliceModal('challan')">
+            <i class="fa fa-receipt"></i> Issue E-Challan
+          </button>
+          <a href="dashboard.html" class="btn-secondary-trichy">
+            <i class="fa fa-map-marked-alt"></i> View Live Traffic Map
+          </a>
+          <button class="btn-secondary-trichy" onclick="alert('Priority Dispatch: Closest ambulance AMB-108-A is currently near Chathiram Bus Stand (1.2 km away).')">
+            <i class="fa fa-ambulance text-danger"></i> Locate Ambulance
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Police Metrics Row -->
+    <div class="stats-grid mb-4">
+      <div class="glass-panel stat-card challans">
+        <div class="stat-label">
+          <span>Today's Violations</span>
+          <i class="fa fa-video text-warning"></i>
+        </div>
+        <div class="stat-value" style="color: #34d399;">35</div>
+        <div class="stat-subtext">Captured by Traffic Cameras</div>
+      </div>
+
+      <div class="glass-panel stat-card challans">
+        <div class="stat-label">
+          <span>Today's Challans</span>
+          <i class="fa fa-file-invoice text-success"></i>
+        </div>
+        <div class="stat-value" style="color: #10b981;">₹42,500</div>
+        <div class="stat-subtext">Issued by Division Officers</div>
+      </div>
+
+      <div class="glass-panel stat-card incidents">
+        <div class="stat-label">
+          <span>Unresolved Incidents</span>
+          <i class="fa fa-clock text-danger"></i>
+        </div>
+        <div class="stat-value" style="color: #f87171;">04</div>
+        <div class="stat-subtext">Officer dispatched on site</div>
+      </div>
+
+      <div class="glass-panel stat-card emergency">
+        <div class="stat-label">
+          <span>Nearby Emergency</span>
+          <i class="fa fa-ambulance text-primary"></i>
+        </div>
+        <div class="stat-value" style="color: #60a5fa;">02</div>
+        <div class="stat-subtext">Corridors in Sector 1</div>
+      </div>
+    </div>
+
+    <!-- Police Content 2-Column Grid -->
+    <div class="row g-4 mb-4">
+      <!-- Unresolved Accidents & Roadblocks -->
+      <div class="col-lg-7">
+        <div class="glass-panel p-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 style="font-weight: 700; color: #fff; margin: 0;">
+              <i class="fa fa-exclamation-circle text-danger me-2"></i> Field Incidents Assigned to You
+            </h5>
+            <span class="status-badge badge-critical">Active Alerts</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;" id="policeIncidentsList">
+            <!-- Populated via script -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Nearby Emergency Vehicles on Field -->
+      <div class="col-lg-5">
+        <div class="glass-panel p-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 style="font-weight: 700; color: #fff; margin: 0;">
+              <i class="fa fa-ambulance text-warning me-2"></i> Emergency Vehicles in Sector
+            </h5>
+            <span class="tricolour-pill">Real-time GPS</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;" id="policeEmergencyVehiclesList">
+            <!-- Populated via script -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Field Challans Issued -->
+    <div class="glass-panel p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 style="font-weight: 700; color: #fff; margin: 0;">
+          <i class="fa fa-receipt text-success me-2"></i> Recent E-Challans Issued by Your Division
+        </h5>
+        <button class="btn-green-trichy" onclick="openPoliceModal('challan')">
+          <i class="fa fa-plus"></i> New Field Challan
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="trichy-table">
+          <thead>
+            <tr>
+              <th>Notice No</th>
+              <th>Vehicle Number</th>
+              <th>Owner Name</th>
+              <th>Violation</th>
+              <th>Location</th>
+              <th>Fine Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="policeChallansTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Session check
+      AuthManager.checkSession('TRAFFIC_POLICE');
+
+      // 2. Populate incidents
+      const incContainer = document.getElementById('policeIncidentsList');
+      if (incContainer) {
+        incContainer.innerHTML = TrichyMockDB.incidents.map(inc => `
+          <div class="glass-panel p-3" style="border-left: 4px solid ${inc.severity === 'CRITICAL' ? '#ef4444' : '#f59e0b'};">
+            <div class="d-flex justify-content-between">
+              <b style="color: #fff; font-size: 0.9rem;">${inc.type.replace('_', ' ')}: ${inc.location}</b>
+              <span class="status-badge badge-${inc.severity.toLowerCase()}">${inc.severity}</span>
+            </div>
+            <div style="font-size: 0.8rem; color: #d1d5db; margin: 4px 0;">${inc.description}</div>
+            <div style="font-size: 0.76rem; color: #38bdf8;"><i class="fa fa-directions"></i> Recommended Detour: ${inc.detour}</div>
+            <div class="d-flex justify-content-end gap-2 mt-2">
+              <button class="btn-secondary-trichy" style="padding: 2px 8px; font-size: 0.72rem;" onclick="alert('Dispatched tow-truck and traffic constables to ${inc.location}.')">
+                <i class="fa fa-truck-pickup"></i> Dispatch Recovery
+              </button>
+              <button class="btn-primary-trichy" style="padding: 2px 8px; font-size: 0.72rem;" onclick="alert('Incident #${inc.id} status updated to RESOLVED in database.')">
+                <i class="fa fa-check"></i> Mark Cleared
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // 3. Populate emergency vehicles
+      const evContainer = document.getElementById('policeEmergencyVehiclesList');
+      if (evContainer) {
+        evContainer.innerHTML = TrichyMockDB.emergencyVehicles.map(v => `
+          <div class="glass-panel p-3" style="border-left: 4px solid #3b82f6;">
+            <div class="d-flex justify-content-between">
+              <b style="color: #fff; font-size: 0.88rem;"><i class="fa fa-ambulance text-danger me-1"></i> ${v.code} (${v.type})</b>
+              <span class="status-badge badge-${v.status === 'EN_ROUTE' ? 'critical' : 'normal'}">${v.status}</span>
+            </div>
+            <div style="font-size: 0.76rem; color: #9ca3af; margin-top: 4px;">
+              Assigned Driver: <b>${v.driver}</b> (${v.contact})
+            </div>
+            <div style="font-size: 0.74rem; color: #38bdf8; margin-top: 2px;">
+              Heading to: Mahatma Gandhi Memorial Govt Hospital (GH)
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // 4. Populate challans
+      const challanBody = document.getElementById('policeChallansTableBody');
+      if (challanBody) {
+        challanBody.innerHTML = TrichyMockDB.challans.slice(0, 7).map(c => `
+          <tr>
+            <td><b>#CHL-${c.id}</b></td>
+            <td><span class="tricolour-pill" style="font-family: monospace;">${c.vehicleNo}</span></td>
+            <td>${c.owner}</td>
+            <td><b style="color: #f87171;">${c.violation}</b></td>
+            <td>${c.location}</td>
+            <td><b>₹${c.fine}</b></td>
+            <td><span class="status-badge ${c.status === 'PAID' ? 'badge-normal' : 'badge-critical'}">${c.status}</span></td>
+          </tr>
+        `).join('');
+      }
+    });
+
+    function openPoliceModal(type) {
+      if (type === 'challan') {
+        const vno = prompt("Enter Vehicle Registration No (e.g. TN45AB1234):", "TN45XX9999");
+        if (!vno) return;
+        const offense = prompt("Enter Offense (Signal Jump / Speeding / No Helmet):", "Signal Jump");
+        const fine = prompt("Fine Amount (₹):", "1000");
+        TrichyAPI.createChallan({
+          vehicleNo: vno.toUpperCase(),
+          owner: "Registered Owner",
+          violation: offense || "Signal Jump",
+          location: "Thillai Nagar Signal",
+          fine: parseFloat(fine) || 1000,
+          status: "UNPAID"
+        });
+        alert(`Challan created successfully for ${vno}!\nLogged under Inspector M. Anbarasan.`);
+        location.reload();
+      } else if (type === 'accident') {
+        const loc = prompt("Enter Accident Location in Trichy:", "Palakkarai Flyover Incline");
+        if (!loc) return;
+        TrichyAPI.reportIncident({
+          type: "ACCIDENT",
+          location: loc,
+          lat: 10.8122,
+          lng: 78.6981,
+          severity: "HIGH",
+          vehicles: 2,
+          injuries: 1,
+          description: "Field officer reported collision.",
+          detour: "Divert via Goods Shed Road"
+        });
+        alert("Accident logged to central control room and map alert broadcasted!");
+        location.reload();
+      } else if (type === 'roadblock') {
+        const reason = prompt("Enter Closure Reason:", "Emergency culvert structural repair");
+        if (!reason) return;
+        TrichyAPI.reportRoadBlock({
+          roadId: 1,
+          roadName: "Cauvery River Trunk Road",
+          reason: reason,
+          severity: "COMPLETE",
+          start: "Now",
+          end: "4 Hours",
+          diversion: "Divert through Thiruvanaikoil old bridge."
+        });
+        alert("Road block logged and central GIS map updated!");
+        location.reload();
+      }
+    }
+  </script>
+</body>
+</html>

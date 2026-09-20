@@ -1,0 +1,151 @@
+/* ==============================================================================
+   TRICHYFLOW Animations: Indian Tricolour Flow, Ashoka Chakra, Traffic Dynamics
+   ============================================================================== */
+
+@keyframes chakraRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes tricolourFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes floatParticles {
+  0% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-25px) translateX(15px);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+}
+
+@keyframes roadLightFlow {
+  0% {
+    stroke-dashoffset: 200;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulseGlowRed {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+@keyframes pulseGlowBlue {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.8);
+  }
+  70% {
+    box-shadow: 0 0 0 18px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+@keyframes pulseGlowGreen {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes greenCorridorDash {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+@keyframes emergencyFlash {
+  0%, 100% {
+    background-color: rgba(220, 38, 38, 0.2);
+    border-color: #ef4444;
+  }
+  50% {
+    background-color: rgba(30, 58, 138, 0.2);
+    border-color: #3b82f6;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-chakra {
+  animation: chakraRotate 60s linear infinite;
+}
+
+.animate-chakra-fast {
+  animation: chakraRotate 20s linear infinite;
+}
+
+.pulse-red {
+  animation: pulseGlowRed 2s infinite;
+}
+
+.pulse-blue {
+  animation: pulseGlowBlue 1.8s infinite;
+}
+
+.pulse-green {
+  animation: pulseGlowGreen 2.2s infinite;
+}
+
+.slide-in {
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.fade-in {
+  animation: fadeInDown 0.3s ease-out forwards;
+}

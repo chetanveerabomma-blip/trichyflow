@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRICHYFLOW — City Traffic Control & Decision Support Centre</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <!-- Leaflet GIS Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/map.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="top-nav">
+    <div class="brand-section">
+      <div class="brand-logo-circle">
+        <img src="assets/images/ashoka_chakra.svg" alt="Chakra" style="width: 28px; height: 28px;" class="animate-chakra">
+      </div>
+      <div>
+        <div class="brand-title">TRICHYFLOW</div>
+        <div class="brand-subtitle">Smart City Traffic Operations & Emergency Command</div>
+      </div>
+    </div>
+
+    <!-- Global Search -->
+    <div class="search-wrapper">
+      <i class="fa fa-search search-icon"></i>
+      <input type="text" id="globalSearchInput" class="search-input" placeholder="Search Junction, Vehicle, Challan, Hospital...">
+    </div>
+
+    <!-- Right Controls -->
+    <div class="nav-actions">
+      <!-- Simulation Status Indicator -->
+      <div class="simulation-pill-banner d-none d-lg-flex">
+        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; margin-right: 6px;" class="pulse-green"></span>
+        <span style="font-size: 0.76rem; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em;">TRICHY TRAFFIC SIMULATION • LIVE</span>
+      </div>
+
+      <!-- Emergency Disaster Mode Toggle -->
+      <button class="btn-danger-trichy" id="disasterModeToggleBtn" style="padding: 6px 12px; font-size: 0.78rem;">
+        <i class="fa fa-radiation"></i> Disaster Mode
+      </button>
+
+      <!-- Notification Bell -->
+      <div style="position: relative;">
+        <button id="notificationBellBtn" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-glass); color: #fff; width: 38px; height: 38px; border-radius: 50%; cursor: pointer;">
+          <i class="fa fa-bell"></i>
+          <span id="unreadNotifBadge" style="position: absolute; top: -2px; right: -2px; background: #ef4444; color: #fff; border-radius: 50%; width: 18px; height: 18px; font-size: 0.65rem; font-weight: bold; display: flex; align-items: center; justify-content: center;">3</span>
+        </button>
+        <!-- Notification Dropdown Drawer -->
+        <div id="notificationDrawer" class="glass-panel" style="display: none; position: absolute; top: 48px; right: 0; width: 320px; max-height: 380px; overflow-y: auto; z-index: 1500; padding: 6px 0;">
+          <div style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); font-weight: 700; font-size: 0.85rem; display: flex; justify-content: space-between;">
+            <span><i class="fa fa-bell text-warning me-1"></i> Control Room Alerts</span>
+            <span style="font-size: 0.7rem; color: #38bdf8; cursor: pointer;">Mark all read</span>
+          </div>
+          <div id="notificationDrawerList"></div>
+        </div>
+      </div>
+
+      <!-- User Profile Badge -->
+      <div class="user-profile-badge">
+        <i class="fa fa-user-circle" style="font-size: 1.4rem; color: var(--saffron);"></i>
+        <div>
+          <div id="navUserName" style="font-size: 0.82rem; font-weight: 700; color: #fff;">Commissioner S. Ramanathan</div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span id="navUserRole" class="role-pill role-admin">ADMIN</span>
+            <span id="navUserBadge" style="font-size: 0.68rem; color: #9ca3af;">IPS-TR-01</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logout Button -->
+      <button id="logoutBtn" class="btn-secondary-trichy" title="Sign Out" style="padding: 6px 10px;">
+        <i class="fa fa-sign-out-alt"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Tricolour Accent Line -->
+  <div class="tricolour-bar"></div>
+
+  <!-- Main Application Container -->
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-heading">Operations</div>
+      <a class="sidebar-item active" data-view="dashboard-view">
+        <i class="fa fa-tachometer-alt"></i> <span>Dashboard</span>
+      </a>
+      <a class="sidebar-item" data-view="map-view">
+        <i class="fa fa-map-marked-alt"></i> <span>Live GIS Map</span>
+      </a>
+      <a class="sidebar-item" data-view="junctions-view">
+        <i class="fa fa-traffic-light"></i> <span>Junctions</span>
+      </a>
+      <a class="sidebar-item" data-view="emergency-view">
+        <i class="fa fa-ambulance"></i> <span>Emergency Corridor</span>
+      </a>
+
+      <div class="sidebar-heading">Incident Control</div>
+      <a class="sidebar-item" data-view="incidents-view">
+        <i class="fa fa-car-crash"></i> <span>Accidents & Incidents</span>
+      </a>
+      <a class="sidebar-item" data-view="roadblocks-view">
+        <i class="fa fa-road-barrier"></i> <span>Road Blocks</span>
+      </a>
+      <a class="sidebar-item" data-view="challans-view">
+        <i class="fa fa-receipt"></i> <span>E-Challan Violations</span>
+      </a>
+
+      <div class="sidebar-heading">Decision Support</div>
+      <a class="sidebar-item" data-view="analytics-view">
+        <i class="fa fa-chart-line"></i> <span>Traffic Analytics</span>
+      </a>
+      <a class="sidebar-item" data-view="predictions-view">
+        <i class="fa fa-brain"></i> <span>Congestion Forecast</span>
+      </a>
+      <a class="sidebar-item" data-view="hospitals-view">
+        <i class="fa fa-hospital"></i> <span>Hospitals Network</span>
+      </a>
+      <a class="sidebar-item" data-view="events-view">
+        <i class="fa fa-calendar-alt"></i> <span>Special Events</span>
+      </a>
+
+      <div class="sidebar-heading">Portal</div>
+      <a href="police-dashboard.html" class="sidebar-item" style="color: #60a5fa;">
+        <i class="fa fa-shield-alt"></i> <span>Police Field View</span>
+      </a>
+    </aside>
+
+    <!-- Main Content Work Area -->
+    <main class="main-content">
+
+      <!-- Dynamic Emergency Corridor Notification Ribbon -->
+      <div id="emergencyCorridorBanner" class="emergency-mode-banner"></div>
+
+      <!-- Disaster Mode Notification Ribbon -->
+      <div id="disasterModeBanner" class="emergency-mode-banner" style="display: none; background: linear-gradient(90deg, #991b1b, #ef4444, #991b1b);">
+        <div>
+          <i class="fa fa-radiation fa-spin me-2"></i>
+          <b>EMERGENCY DISASTER TRAFFIC MODE ACTIVE:</b> River Cauvery High Water Flood Influx & Srirangam Arterial Diversions Active.
+        </div>
+        <button class="btn-secondary-trichy" style="padding: 4px 10px; font-size: 0.72rem;" onclick="toggleDisasterMode(false)">Deactivate</button>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 1: DASHBOARD OVERVIEW -->
+      <!-- =============================================================== -->
+      <div id="dashboard-view" class="view-panel">
+        
+        <!-- Animated Stat Counters Row -->
+        <div class="stats-grid mb-4">
+          <div class="glass-panel stat-card junctions">
+            <div class="stat-label">
+              <span>Live Junctions</span>
+              <i class="fa fa-traffic-light text-warning"></i>
+            </div>
+            <div class="stat-value" id="counterJunctions">18</div>
+            <div class="stat-subtext"><span style="color: #10b981;">● 18 Online</span> in Trichy City</div>
+          </div>
+
+          <div class="glass-panel stat-card incidents">
+            <div class="stat-label">
+              <span>Active Incidents</span>
+              <i class="fa fa-car-crash text-danger"></i>
+            </div>
+            <div class="stat-value" id="counterIncidents" style="color: #f87171;">07</div>
+            <div class="stat-subtext">2 Critical • 3 High Severity</div>
+          </div>
+
+          <div class="glass-panel stat-card congestion">
+            <div class="stat-label">
+              <span>Heavy Traffic</span>
+              <i class="fa fa-fire text-warning"></i>
+            </div>
+            <div class="stat-value" id="counterCongestion" style="color: #fbbf24;">08</div>
+            <div class="stat-subtext">Central Bus Stand & TVS Tollgate</div>
+          </div>
+
+          <div class="glass-panel stat-card emergency">
+            <div class="stat-label">
+              <span>Emergency Vehicles</span>
+              <i class="fa fa-ambulance text-primary"></i>
+            </div>
+            <div class="stat-value" id="counterEmergency" style="color: #60a5fa;">03</div>
+            <div class="stat-subtext">1 Green Corridor Active</div>
+          </div>
+
+          <div class="glass-panel stat-card roadblocks">
+            <div class="stat-label">
+              <span>Road Blocks</span>
+              <i class="fa fa-road-barrier text-secondary"></i>
+            </div>
+            <div class="stat-value" id="counterRoadBlocks" style="color: #cbd5e1;">02</div>
+            <div class="stat-subtext">1 Full (UGD) • 1 Partial</div>
+          </div>
+
+          <div class="glass-panel stat-card challans">
+            <div class="stat-label">
+              <span>Pending Challans</span>
+              <i class="fa fa-receipt text-success"></i>
+            </div>
+            <div class="stat-value" id="counterChallans" style="color: #34d399;">124</div>
+            <div class="stat-subtext">₹1.85 Lakhs Collection Pending</div>
+          </div>
+        </div>
+
+        <!-- Live City Map Section -->
+        <div class="glass-panel map-card mb-4">
+          <div class="map-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="tricolour-pill"><i class="fa fa-satellite-dish"></i> Trichy GIS Command Map</span>
+              <span style="font-size: 0.8rem; color: #9CA3AF;">Tiruchirappalli City Corporation Road Network</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-secondary-trichy" style="padding: 4px 10px; font-size: 0.75rem;" onclick="MapController.panTo(10.8285, 78.6948)">
+                <i class="fa fa-location-arrow"></i> Chathiram
+              </button>
+              <button class="btn-secondary-trichy" style="padding: 4px 10px; font-size: 0.75rem;" onclick="MapController.panTo(10.7968, 78.6865)">
+                <i class="fa fa-location-arrow"></i> Central Bus Stand
+              </button>
+              <button class="btn-secondary-trichy" style="padding: 4px 10px; font-size: 0.75rem;" onclick="MapController.panTo(10.8625, 78.6912)">
+                <i class="fa fa-location-arrow"></i> Srirangam
+              </button>
+            </div>
+          </div>
+
+          <!-- Leaflet Map Canvas -->
+          <div id="trichyMap" class="map-container"></div>
+
+          <!-- Floating Map Legend -->
+          <div class="map-legend-box">
+            <div style="font-weight: 700; margin-bottom: 2px; color: #fff;">Legend</div>
+            <div class="legend-item"><span class="legend-dot" style="background: #10B981;"></span> Normal Traffic</div>
+            <div class="legend-item"><span class="legend-dot" style="background: #F59E0B;"></span> Moderate Density</div>
+            <div class="legend-item"><span class="legend-dot" style="background: #EF4444;"></span> Heavy / Critical</div>
+            <div class="legend-item"><span class="legend-dot" style="background: #475569;"></span> Blocked Road</div>
+            <div class="legend-item"><span class="legend-dot" style="background: #F97316;"></span> Accident / Hazard</div>
+            <div class="legend-item"><span class="legend-dot" style="background: #2563EB;"></span> Trichy Hospital</div>
+            <div class="legend-item"><span class="legend-dot" style="background: #DC2626;"></span> Emergency Ambulance</div>
+          </div>
+        </div>
+
+        <!-- Two Column Control Section -->
+        <div class="dashboard-grid-2 mb-4">
+          <!-- Left: Emergency Corridor Quick Dispatch -->
+          <div class="glass-panel" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div>
+                <h5 style="font-weight: 700; margin: 0; color: #fff;"><i class="fa fa-ambulance text-danger me-2"></i> Emergency Green Corridor Dispatcher</h5>
+                <span style="font-size: 0.76rem; color: #9CA3AF;">Dijkstra-Powered Pre-emptive Traffic Signal Clearance</span>
+              </div>
+              <span class="tricolour-pill">Priority Algorithm</span>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Select Active Emergency Vehicle</label>
+                <select id="corridorVehicleSelect" class="form-control-trichy"></select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Destination Trauma / Hospital Hub</label>
+                <select id="corridorHospitalSelect" class="form-control-trichy"></select>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mb-3">
+              <button id="activateCorridorBtn" class="btn-danger-trichy flex-fill justify-content-center py-2">
+                <i class="fa fa-broadcast-tower"></i> Activate Emergency Green Corridor
+              </button>
+              <button id="clearCorridorBtn" class="btn-secondary-trichy">
+                <i class="fa fa-times"></i> Clear
+              </button>
+            </div>
+
+            <!-- Corridor Sequence List -->
+            <div id="corridorSequenceList">
+              <div style="color: #6b7280; font-size: 0.85rem; padding: 12px; text-align: center;">
+                Select vehicle and destination above to compute shortest green corridor path across Trichy.
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Live Incident Alert Feed -->
+          <div class="glass-panel" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h5 style="font-weight: 700; margin: 0; color: #fff;"><i class="fa fa-exclamation-triangle text-warning me-2"></i> Active Incidents & Detours</h5>
+              <button class="btn-secondary-trichy" style="padding: 4px 8px; font-size: 0.72rem;" onclick="document.querySelector('[data-view=incidents-view]').click()">View All</button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto;">
+              <div class="glass-panel" style="padding: 12px; border-left: 4px solid #ef4444;">
+                <div style="display: flex; justify-content: space-between;">
+                  <b style="color: #ef4444; font-size: 0.84rem;">Central Bus Stand Exit Gate</b>
+                  <span class="status-badge badge-critical">CRITICAL</span>
+                </div>
+                <div style="font-size: 0.78rem; color: #d1d5db; margin: 4px 0;">Bus collision obstructing northbound lane. Casualties: 2.</div>
+                <div style="font-size: 0.72rem; color: #38bdf8;"><i class="fa fa-directions"></i> Detour: Divert via Williams Road & Cantonment.</div>
+              </div>
+
+              <div class="glass-panel" style="padding: 12px; border-left: 4px solid #f97316;">
+                <div style="display: flex; justify-content: space-between;">
+                  <b style="color: #f97316; font-size: 0.84rem;">Chathiram Bus Stand Corner</b>
+                  <span class="status-badge badge-heavy">HIGH</span>
+                </div>
+                <div style="font-size: 0.78rem; color: #d1d5db; margin: 4px 0;">Two-wheeler accident. Clearance in progress.</div>
+                <div style="font-size: 0.72rem; color: #38bdf8;"><i class="fa fa-directions"></i> Detour: Route via Karur Bypass Road.</div>
+              </div>
+
+              <div class="glass-panel" style="padding: 12px; border-left: 4px solid #eab308;">
+                <div style="display: flex; justify-content: space-between;">
+                  <b style="color: #eab308; font-size: 0.84rem;">TVS Tollgate Subway</b>
+                  <span class="status-badge badge-moderate">WATER LOGGING</span>
+                </div>
+                <div style="font-size: 0.78rem; color: #d1d5db; margin: 4px 0;">2.5 ft water accumulation in underpass.</div>
+                <div style="font-size: 0.72rem; color: #38bdf8;"><i class="fa fa-directions"></i> Detour: Subramaniapuram Overbridge.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trichy Junction Status Table -->
+        <div class="glass-panel" style="padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <div>
+              <h5 style="font-weight: 700; margin: 0; color: #fff;"><i class="fa fa-traffic-light text-warning me-2"></i> Trichy City Junction Monitoring & Signal Status</h5>
+              <span style="font-size: 0.76rem; color: #9CA3AF;">Real-time directional splits & adaptive Webster algorithm recommendations</span>
+            </div>
+            <span class="tricolour-pill">18 Monitored Nodes</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="trichy-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Junction Name</th>
+                  <th>Landmark</th>
+                  <th>Density</th>
+                  <th>Live VPM</th>
+                  <th>Signal Phase</th>
+                  <th>Green / Red</th>
+                  <th>Congestion</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="junctionsOverviewTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 2: JUNCTIONS MANAGEMENT -->
+      <!-- =============================================================== -->
+      <div id="junctions-view" class="view-panel" style="display: none;">
+        <div class="glass-panel p-4 mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h4 style="font-weight: 800; color: #fff;">Trichy City Junction Management</h4>
+              <p style="font-size: 0.82rem; color: #9ca3af; margin: 0;">Comprehensive junction parameters, directional flow splits, and timing overrides.</p>
+            </div>
+            <button class="btn-primary-trichy" onclick="alert('Junction auto-sync initialized with Trichy Corporation traffic sensors.')">
+              <i class="fa fa-sync"></i> Refresh Feeds
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="trichy-table">
+              <thead>
+                <tr>
+                  <th>Junction</th>
+                  <th>Coordinates</th>
+                  <th>4-Way Traffic Split (VPM)</th>
+                  <th>Current Phase</th>
+                  <th>Green Time</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="junctionsFullTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 3: INCIDENTS & ACCIDENTS -->
+      <!-- =============================================================== -->
+      <div id="incidents-view" class="view-panel" style="display: none;">
+        <div class="row g-4">
+          <div class="col-lg-5">
+            <div class="glass-panel p-4">
+              <h5 style="font-weight: 700; color: #fff; margin-bottom: 16px;"><i class="fa fa-plus-circle text-danger me-2"></i> Report Traffic Incident / Accident</h5>
+              <form id="reportAccidentForm">
+                <div class="form-group">
+                  <label class="form-label">Incident Type</label>
+                  <select id="accidentType" class="form-control-trichy">
+                    <option value="ACCIDENT">Accident (Collision)</option>
+                    <option value="VEHICLE_BREAKDOWN">Vehicle Breakdown / Stalled</option>
+                    <option value="WATER_LOGGING">Water Logging / Flood Submersion</option>
+                    <option value="OIL_SPILL">Oil / Fuel Spill Hazard</option>
+                    <option value="FALLEN_TREE">Fallen Tree / Cable Obstruction</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Location / Landmark in Trichy</label>
+                  <input type="text" id="accidentLocation" class="form-control-trichy" placeholder="e.g. Near Rockfort Main Guard Gate" required>
+                </div>
+                <div class="row g-2">
+                  <div class="col-6 form-group">
+                    <label class="form-label">Latitude</label>
+                    <input type="number" step="0.0001" id="accidentLat" class="form-control-trichy" value="10.8262">
+                  </div>
+                  <div class="col-6 form-group">
+                    <label class="form-label">Longitude</label>
+                    <input type="number" step="0.0001" id="accidentLng" class="form-control-trichy" value="78.6974">
+                  </div>
+                </div>
+                <div class="row g-2">
+                  <div class="col-4 form-group">
+                    <label class="form-label">Severity</label>
+                    <select id="accidentSeverity" class="form-control-trichy">
+                      <option value="LOW">Low</option>
+                      <option value="MEDIUM" selected>Medium</option>
+                      <option value="HIGH">High</option>
+                      <option value="CRITICAL">Critical</option>
+                    </select>
+                  </div>
+                  <div class="col-4 form-group">
+                    <label class="form-label">Vehicles</label>
+                    <input type="number" id="accidentVehicles" class="form-control-trichy" value="2">
+                  </div>
+                  <div class="col-4 form-group">
+                    <label class="form-label">Injuries</label>
+                    <input type="number" id="accidentInjuries" class="form-control-trichy" value="0">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Description / Dispatch Instructions</label>
+                  <textarea id="accidentDescription" class="form-control-trichy" rows="3" placeholder="Details of incident and emergency response needed..."></textarea>
+                </div>
+                <button type="submit" class="btn-danger-trichy w-100 py-2 justify-content-center">
+                  <i class="fa fa-broadcast-tower"></i> Broadcast Incident & Apply Detour
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-lg-7">
+            <div class="glass-panel p-4">
+              <h5 style="font-weight: 700; color: #fff; margin-bottom: 14px;"><i class="fa fa-list-alt text-warning me-2"></i> All Active Incidents</h5>
+              <div class="table-responsive">
+                <table class="trichy-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Type</th>
+                      <th>Location</th>
+                      <th>Severity</th>
+                      <th>Injuries</th>
+                      <th>Detour Route</th>
+                      <th>Status</th>
+                      <th>Map</th>
+                    </tr>
+                  </thead>
+                  <tbody id="incidentsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 4: ROAD BLOCKS -->
+      <!-- =============================================================== -->
+      <div id="roadblocks-view" class="view-panel" style="display: none;">
+        <div class="row g-4">
+          <div class="col-lg-5">
+            <div class="glass-panel p-4">
+              <h5 style="font-weight: 700; color: #fff; margin-bottom: 16px;"><i class="fa fa-road-barrier text-warning me-2"></i> Enforce Road Block / Closure</h5>
+              <form id="reportBlockForm">
+                <div class="form-group">
+                  <label class="form-label">Select Road Segment</label>
+                  <select id="blockRoadSelect" class="form-control-trichy"></select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Closure Reason</label>
+                  <input type="text" id="blockReason" class="form-control-trichy" placeholder="e.g. UGD Drainage pipe laying" required>
+                </div>
+                <div class="row g-2">
+                  <div class="col-6 form-group">
+                    <label class="form-label">Severity</label>
+                    <select id="blockSeverity" class="form-control-trichy">
+                      <option value="PARTIAL">Partial Blockage (1 Lane Open)</option>
+                      <option value="COMPLETE" selected>Complete Closure (Both Lanes)</option>
+                    </select>
+                  </div>
+                  <div class="col-6 form-group">
+                    <label class="form-label">Expected Duration</label>
+                    <input type="text" id="blockDuration" class="form-control-trichy" placeholder="e.g. 5 Days / 48 Hours">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Suggested Diversion Plan</label>
+                  <textarea id="blockDiversion" class="form-control-trichy" rows="3" placeholder="Detail the alternative arterial routes for city buses and cars..."></textarea>
+                </div>
+                <button type="submit" class="btn-primary-trichy w-100 py-2 justify-content-center">
+                  <i class="fa fa-ban"></i> Enforce Block & Halt Traffic Flow
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-lg-7">
+            <div class="glass-panel p-4">
+              <h5 style="font-weight: 700; color: #fff; margin-bottom: 14px;"><i class="fa fa-traffic-cone text-danger me-2"></i> Current Road Closures in Trichy</h5>
+              <div class="table-responsive">
+                <table class="trichy-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Road Name</th>
+                      <th>Reason</th>
+                      <th>Severity</th>
+                      <th>Duration</th>
+                      <th>Diversion Route</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="roadBlocksTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 5: E-CHALLANS & VIOLATIONS -->
+      <!-- =============================================================== -->
+      <div id="challans-view" class="view-panel" style="display: none;">
+        <div class="glass-panel p-4">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+              <h4 style="font-weight: 800; color: #fff; margin: 0;">Trichy City E-Challan & Violations Registry</h4>
+              <span style="font-size: 0.8rem; color: #9ca3af;">Track, search and issue automated traffic fine notices</span>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn-primary-trichy" onclick="document.getElementById('createChallanModal').style.display='flex'">
+                <i class="fa fa-plus"></i> Issue New Challan
+              </button>
+            </div>
+          </div>
+
+          <!-- Filters Row -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <input type="text" id="challanSearchInput" class="form-control-trichy" placeholder="Search by TN Vehicle No (e.g. TN45AB1234), Owner, Offense...">
+            </div>
+            <div class="col-md-3">
+              <select id="challanStatusFilter" class="form-control-trichy">
+                <option value="ALL">All Payment Statuses</option>
+                <option value="PAID">PAID</option>
+                <option value="UNPAID">UNPAID</option>
+                <option value="PENDING">PENDING</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="trichy-table">
+              <thead>
+                <tr>
+                  <th>Challan ID</th>
+                  <th>Vehicle Number</th>
+                  <th>Owner Name</th>
+                  <th>Violation Type</th>
+                  <th>Location</th>
+                  <th>Fine</th>
+                  <th>Status</th>
+                  <th>Evidence</th>
+                </tr>
+              </thead>
+              <tbody id="challansTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 6: TRAFFIC ANALYTICS (CHART.JS) -->
+      <!-- =============================================================== -->
+      <div id="analytics-view" class="view-panel" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h4 style="font-weight: 800; color: #fff; margin: 0;">Trichy City Traffic Analytics Dashboard</h4>
+            <span style="font-size: 0.8rem; color: #9ca3af;">Historical patterns, peak flow density, violation stats, and emergency response performance</span>
+          </div>
+          <!-- Filter Buttons -->
+          <div class="d-flex gap-2">
+            <button class="btn-secondary-trichy analytics-filter-btn" data-filter="today">Today</button>
+            <button class="btn-secondary-trichy analytics-filter-btn active" data-filter="7d">7 Days</button>
+            <button class="btn-secondary-trichy analytics-filter-btn" data-filter="30d">30 Days</button>
+            <button class="btn-secondary-trichy analytics-filter-btn" data-filter="3m">3 Months</button>
+          </div>
+        </div>
+
+        <!-- Grid of 8 Analytics Charts -->
+        <div class="row g-4">
+          <!-- Chart 1: Hourly Traffic -->
+          <div class="col-lg-6">
+            <div class="glass-panel p-3" style="height: 320px;">
+              <div style="font-weight: 700; font-size: 0.88rem; color: #fff; margin-bottom: 8px;">
+                <i class="fa fa-clock text-warning me-1"></i> Traffic Volume by Hour (Peak Flow)
+              </div>
+              <div style="height: 260px; position: relative;">
+                <canvas id="chartHourlyTraffic"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 2: Daily Traffic -->
+          <div class="col-lg-6">
+            <div class="glass-panel p-3" style="height: 320px;">
+              <div style="font-weight: 700; font-size: 0.88rem; color: #fff; margin-bottom: 8px;">
+                <i class="fa fa-calendar-day text-success me-1"></i> Weekly Traffic Load by Day
+              </div>
+              <div style="height: 260px; position: relative;">
+                <canvas id="chartDailyTraffic"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 3: Junction Volume -->
+          <div class="col-lg-6">
+            <div class="glass-panel p-3" style="height: 320px;">
+              <div style="font-weight: 700; font-size: 0.88rem; color: #fff; margin-bottom: 8px;">
+                <i class="fa fa-traffic-light text-danger me-1"></i> Peak Volume by Junction (VPM)
+              </div>
+              <div style="height: 260px; position: relative;">
+                <canvas id="chartJunctionVolume"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 4: Accidents Month -->
+          <div class="col-lg-6">
+            <div class="glass-panel p-3" style="height: 320px;">
+              <div style="font-weight: 700; font-size: 0.88rem; color: #fff; margin-bottom: 8px;">
+                <i class="fa fa-car-crash text-warning me-1"></i> Incident Frequency per Month
+              </div>
+              <div style="height: 260px; position: relative;">
+                <canvas id="chartAccidentsMonth"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 5: Challans Revenue -->
+          <div class="col-lg-6">
+            <div class="glass-panel p-3" style="height: 320px;">
+              <div style="font-weight: 700; font-size: 0.88rem; color: #fff; margin-bottom: 8px;">
+                <i class="fa fa-receipt text-success me-1"></i> E-Challan Collections vs Pending (₹ Lakhs)
+              </div>
+              <div style="height: 260px; position: relative;">
+                <canvas id="chartChallansMonth"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 6: Road Blocks Frequency -->
+          <div class="col-lg-6">
+            <div class="glass-panel p-3" style="height: 320px;">
+              <div style="font-weight: 700; font-size: 0.88rem; color: #fff; margin-bottom: 8px;">
+                <i class="fa fa-chart-pie text-info me-1"></i> Road Block Causes Distribution
+              </div>
+              <div style="height: 260px; position: relative;">
+                <canvas id="chartRoadBlocks"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 7: Emergency Response Time -->
+          <div class="col-lg-6">
+            <div class="glass-panel p-3" style="height: 320px;">
+              <div style="font-weight: 700; font-size: 0.88rem; color: #fff; margin-bottom: 8px;">
+                <i class="fa fa-ambulance text-primary me-1"></i> Emergency Response Time Comparison (Mins)
+              </div>
+              <div style="height: 260px; position: relative;">
+                <canvas id="chartEmergencyResponse"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 8: Congestion Trends -->
+          <div class="col-lg-6">
+            <div class="glass-panel p-3" style="height: 320px;">
+              <div style="font-weight: 700; font-size: 0.88rem; color: #fff; margin-bottom: 8px;">
+                <i class="fa fa-chart-area text-info me-1"></i> City-wide Congestion Index Trend
+              </div>
+              <div style="height: 260px; position: relative;">
+                <canvas id="chartCongestionTrend"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 7: CONGESTION PREDICTIONS -->
+      <!-- =============================================================== -->
+      <div id="predictions-view" class="view-panel" style="display: none;">
+        <div class="row g-4">
+          <div class="col-lg-5">
+            <div class="glass-panel p-4">
+              <h5 style="font-weight: 700; color: #fff; margin-bottom: 16px;">
+                <i class="fa fa-brain text-warning me-2"></i> Transparent Rule-Based Prediction Engine
+              </h5>
+              <div class="alert alert-info py-2 px-3 mb-3" style="font-size: 0.76rem; background: rgba(56, 189, 248, 0.1); border-color: #38bdf8; color: #bae6fd;">
+                <i class="fa fa-info-circle me-1"></i> Transparent rule-driven model evaluating diurnal commute peaks, weather degradation, and festival influx. Architecture ready for ML model integration.
+              </div>
+
+              <form id="predictionForm">
+                <div class="form-group">
+                  <label class="form-label">Target Junction</label>
+                  <select id="predJunction" class="form-control-trichy"></select>
+                </div>
+                <div class="row g-2">
+                  <div class="col-6 form-group">
+                    <label class="form-label">Day of Week</label>
+                    <select id="predDay" class="form-control-trichy">
+                      <option value="Monday" selected>Monday</option>
+                      <option value="Tuesday">Tuesday</option>
+                      <option value="Wednesday">Wednesday</option>
+                      <option value="Thursday">Thursday</option>
+                      <option value="Friday">Friday</option>
+                      <option value="Saturday">Saturday</option>
+                      <option value="Sunday">Sunday</option>
+                    </select>
+                  </div>
+                  <div class="col-6 form-group">
+                    <label class="form-label">Time Slot</label>
+                    <select id="predTime" class="form-control-trichy">
+                      <option value="09:00 AM" selected>09:00 AM (Morning Peak)</option>
+                      <option value="01:00 PM">01:00 PM (Mid-Day)</option>
+                      <option value="06:30 PM">06:30 PM (Evening Peak)</option>
+                      <option value="10:30 PM">10:30 PM (Night Clearance)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row g-2">
+                  <div class="col-6 form-group">
+                    <label class="form-label">Weather Condition</label>
+                    <select id="predWeather" class="form-control-trichy">
+                      <option value="Clear" selected>Clear / Dry</option>
+                      <option value="Rain">Monsoon Rain (35% Delay)</option>
+                      <option value="Storm">Thunderstorm</option>
+                    </select>
+                  </div>
+                  <div class="col-6 form-group">
+                    <label class="form-label">Special Event</label>
+                    <select id="predEvent" class="form-control-trichy">
+                      <option value="None" selected>None (Regular Day)</option>
+                      <option value="Srirangam Festival">Srirangam Temple Festival</option>
+                      <option value="College Symposium">College Tech Symposium</option>
+                      <option value="VIP Convoy">Government VIP Convoy</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="button" class="btn-primary-trichy w-100 py-2 justify-content-center mt-2" onclick="runTrafficPrediction()">
+                  <i class="fa fa-chart-line"></i> Generate Congestion Forecast
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-lg-7">
+            <div class="glass-panel p-4" id="predictionResultCard">
+              <h5 style="font-weight: 700; color: #fff; margin-bottom: 16px;">
+                <i class="fa fa-bullseye text-success me-2"></i> Forecast & Recommended Strategy
+              </h5>
+              <div id="predOutputContainer">
+                <div style="text-align: center; color: #6b7280; padding: 40px 20px;">
+                  Configure parameters on the left and click "Generate Congestion Forecast" to evaluate traffic density.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 8: HOSPITALS NETWORK -->
+      <!-- =============================================================== -->
+      <div id="hospitals-view" class="view-panel" style="display: none;">
+        <div class="glass-panel p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h4 style="font-weight: 800; color: #fff; margin: 0;">Trichy Trauma & Hospital Network</h4>
+              <span style="font-size: 0.8rem; color: #9ca3af;">Real-time emergency capacity, trauma ICU beds, and green corridor endpoints</span>
+            </div>
+            <span class="tricolour-pill">6 Major Centers</span>
+          </div>
+
+          <div class="row g-4" id="hospitalsCardsGrid"></div>
+        </div>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 9: SPECIAL EVENTS & DISASTER -->
+      <!-- =============================================================== -->
+      <div id="events-view" class="view-panel" style="display: none;">
+        <div class="glass-panel p-4 mb-4">
+          <h4 style="font-weight: 800; color: #fff; margin-bottom: 12px;">Special Events & Festival Traffic Management</h4>
+          <p style="font-size: 0.82rem; color: #9ca3af;">Trichy hosts major cultural events like Srirangam Vaikunta Ekadasi and Rockfort Chariot Festival that require special road diversions.</p>
+          
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="glass-panel p-3" style="border-top: 4px solid var(--saffron);">
+                <b style="color: #fff; font-size: 0.95rem;">Srirangam Vaikunta Ekadasi</b>
+                <div style="font-size: 0.78rem; color: #9ca3af; margin: 6px 0;">Expected Devotees: 1,50,000+</div>
+                <div style="font-size: 0.74rem; color: #38bdf8; margin-bottom: 12px;">Diversion: Cauvery Bridge outer parking, non-devotee traffic via Mambalasalai.</div>
+                <button class="btn-primary-trichy w-100 justify-content-center" onclick="alert('Event Mode Engaged: Arterial signal pre-emption active for Srirangam.')">
+                  <i class="fa fa-flag"></i> Activate Festival Mode
+                </button>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="glass-panel p-3" style="border-top: 4px solid #3b82f6;">
+                <b style="color: #fff; font-size: 0.95rem;">NIT Trichy Fest (Pragyan)</b>
+                <div style="font-size: 0.78rem; color: #9ca3af; margin: 6px 0;">Expected Attendees: 12,000+</div>
+                <div style="font-size: 0.74rem; color: #38bdf8; margin-bottom: 12px;">Diversion: Dedicated shuttle lane on Tanjore Highway.</div>
+                <button class="btn-secondary-trichy w-100 justify-content-center" onclick="alert('Event Mode Engaged: Campus shuttle bus priority active.')">
+                  <i class="fa fa-bus"></i> Activate Student Mode
+                </button>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="glass-panel p-3" style="border-top: 4px solid #ef4444;">
+                <b style="color: #fff; font-size: 0.95rem;">Rockfort Chithirai Car Festival</b>
+                <div style="font-size: 0.78rem; color: #9ca3af; margin: 6px 0;">Expected Crowd: 80,000+</div>
+                <div style="font-size: 0.74rem; color: #38bdf8; margin-bottom: 12px;">Diversion: Teppakulam perimeter pedestrianized, detour via Karur Bypass.</div>
+                <button class="btn-primary-trichy w-100 justify-content-center" onclick="alert('Event Mode Engaged: Bazaar pedestrianization and bypass active.')">
+                  <i class="fa fa-walking"></i> Activate Chariot Mode
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- =============================================================== -->
+  <!-- MODALS -->
+  <!-- =============================================================== -->
+
+  <!-- 1. Signal Plan Optimization Modal -->
+  <div id="signalPlanModal" class="modal-overlay">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h5 id="signalModalTitle" style="font-weight: 800; color: #fff; margin: 0;">Adaptive Signal Optimization</h5>
+        <button class="close-modal-btn" style="background: none; border: none; color: #9ca3af; font-size: 1.2rem; cursor: pointer;"><i class="fa fa-times"></i></button>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-3 text-center">
+          <div class="glass-panel p-2">
+            <span style="font-size: 0.7rem; color: #9ca3af;">North Flow</span>
+            <div id="planNorthFlow" style="font-weight: 700; color: #38bdf8;">--</div>
+          </div>
+        </div>
+        <div class="col-3 text-center">
+          <div class="glass-panel p-2">
+            <span style="font-size: 0.7rem; color: #9ca3af;">South Flow</span>
+            <div id="planSouthFlow" style="font-weight: 700; color: #38bdf8;">--</div>
+          </div>
+        </div>
+        <div class="col-3 text-center">
+          <div class="glass-panel p-2">
+            <span style="font-size: 0.7rem; color: #9ca3af;">East Flow</span>
+            <div id="planEastFlow" style="font-weight: 700; color: #38bdf8;">--</div>
+          </div>
+        </div>
+        <div class="col-3 text-center">
+          <div class="glass-panel p-2">
+            <span style="font-size: 0.7rem; color: #9ca3af;">West Flow</span>
+            <div id="planWestFlow" style="font-weight: 700; color: #38bdf8;">--</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <!-- Current Plan -->
+        <div class="col-6">
+          <div class="glass-panel p-3" style="border: 1px solid rgba(255, 255, 255, 0.1);">
+            <div style="font-size: 0.75rem; color: #9ca3af; text-transform: uppercase;">CURRENT SIGNAL PLAN</div>
+            <div class="mt-2">
+              <div style="font-size: 0.82rem; color: #fff;">North-South: <b id="currNSGreen" style="color: #10b981;">--</b></div>
+              <div style="font-size: 0.82rem; color: #fff;">East-West: <b id="currEWGreen" style="color: #ef4444;">--</b></div>
+              <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 4px;">Phase: <span id="currPhase" style="color: #60a5fa;">--</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommended Plan -->
+        <div class="col-6">
+          <div class="glass-panel p-3" style="border: 1px solid var(--saffron);">
+            <div style="font-size: 0.75rem; color: var(--saffron); text-transform: uppercase; font-weight: 700;">RECOMMENDED PLAN</div>
+            <div class="mt-2">
+              <div style="font-size: 0.82rem; color: #fff;">North-South: <b id="recomNSGreen" style="color: #10b981;">--</b></div>
+              <div style="font-size: 0.82rem; color: #fff;">East-West: <b id="recomEWGreen" style="color: #ef4444;">--</b></div>
+              <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 4px;">Phase: <span id="recomPhase" style="color: #60a5fa;">--</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-panel p-3 mb-3">
+        <div style="font-size: 0.78rem; color: #9ca3af;"><b>Algorithm Rationale:</b> <span id="recomReason" style="color: #fff;">--</span></div>
+        <div style="font-size: 0.78rem; color: #10b981; margin-top: 4px;"><b>Expected Delay Reduction:</b> <span id="recomReduction">--</span></div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2">
+        <button class="btn-secondary-trichy close-modal-btn">Cancel</button>
+        <button id="applySignalSimulationBtn" class="btn-primary-trichy">
+          <i class="fa fa-check"></i> Apply Simulation to Junction
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Create Challan Modal -->
+  <div id="createChallanModal" class="modal-overlay">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h5 style="font-weight: 800; color: #fff; margin: 0;"><i class="fa fa-receipt text-success me-2"></i> Issue E-Challan Notice</h5>
+        <button onclick="document.getElementById('createChallanModal').style.display='none'" style="background: none; border: none; color: #9ca3af; font-size: 1.2rem; cursor: pointer;"><i class="fa fa-times"></i></button>
+      </div>
+
+      <form id="createChallanForm">
+        <div class="form-group">
+          <label class="form-label">Vehicle Registration Number (e.g. TN45AB1234)</label>
+          <input type="text" id="newChallanVehicle" class="form-control-trichy" placeholder="TN45AB1234" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vehicle Registered Owner</label>
+          <input type="text" id="newChallanOwner" class="form-control-trichy" placeholder="Full name of vehicle owner" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Traffic Violation Offense</label>
+          <select id="newChallanViolation" class="form-control-trichy">
+            <option value="Signal Jump">Signal Jump (Red Light Violation)</option>
+            <option value="Speeding">Speeding (Exceeding City Limit)</option>
+            <option value="No Helmet">No Helmet (Two-Wheeler)</option>
+            <option value="No Seat Belt">No Seat Belt (Four-Wheeler)</option>
+            <option value="Wrong Parking">Wrong Parking (Obstruction)</option>
+            <option value="Dangerous Driving">Dangerous / Rash Driving</option>
+            <option value="Driving Without License">Driving Without Valid License</option>
+          </select>
+        </div>
+        <div class="row g-2">
+          <div class="col-7 form-group">
+            <label class="form-label">Incident Location</label>
+            <input type="text" id="newChallanLocation" class="form-control-trichy" placeholder="e.g. Chathiram Signal" required>
+          </div>
+          <div class="col-5 form-group">
+            <label class="form-label">Penalty Amount (₹)</label>
+            <input type="number" id="newChallanFine" class="form-control-trichy" value="1000">
+          </div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button type="button" class="btn-secondary-trichy" onclick="document.getElementById('createChallanModal').style.display='none'">Cancel</button>
+          <button type="submit" class="btn-green-trichy">
+            <i class="fa fa-file-invoice"></i> Issue Challan Notice
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <!-- Leaflet GIS JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Application JS Modules -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/traffic-animation.js"></script>
+  <script src="js/green-corridor.js"></script>
+  <script src="js/signal-planner.js"></script>
+  <script src="js/incident-manager.js"></script>
+  <script src="js/challan-manager.js"></script>
+  <script src="js/analytics-charts.js"></script>
+  <script src="js/notifications.js"></script>
+
+  <!-- Dashboard Bootstrapper & View Routing -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Check user session
+      const user = AuthManager.checkSession();
+      if (!user) return;
+
+      // 2. Initialize Leaflet Map
+      MapController.init();
+
+      // 3. Initialize feature controllers
+      GreenCorridor.init();
+      SignalPlanner.init();
+      IncidentManager.init();
+      ChallanManager.init();
+      NotificationManager.init();
+
+      // 4. Render initial tables & views
+      renderOverviewJunctions();
+      renderHospitalCards();
+      IncidentManager.renderIncidentTable();
+      IncidentManager.renderRoadBlockTable();
+      updateDashboardCounters();
+
+      // 5. Sidebar view switcher
+      document.querySelectorAll('.sidebar-item[data-view]').forEach(item => {
+        item.addEventListener('click', (e) => {
+          document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+          e.currentTarget.classList.add('active');
+
+          const targetView = e.currentTarget.getAttribute('data-view');
+          document.querySelectorAll('.view-panel').forEach(p => p.style.display = 'none');
+
+          const activePanel = document.getElementById(targetView);
+          if (activePanel) {
+            activePanel.style.display = 'block';
+
+            // Lazy initialize analytics charts
+            if (targetView === 'analytics-view') {
+              AnalyticsCharts.init();
+            }
+            // Trigger leaflet map recalculation
+            if (MapController.map) {
+              setTimeout(() => MapController.map.invalidateSize(), 200);
+            }
+          }
+        });
+      });
+
+      // 6. Global Search functionality
+      const searchBox = document.getElementById('globalSearchInput');
+      if (searchBox) {
+        searchBox.addEventListener('keyup', (e) => {
+          if (e.key === 'Enter') {
+            const val = e.target.value.trim().toLowerCase();
+            const junc = TrichyMockDB.junctions.find(j => j.name.toLowerCase().includes(val) || j.landmark.toLowerCase().includes(val));
+            if (junc) {
+              MapController.panTo(junc.lat, junc.lng, 16);
+              if (MapController.junctionMarkers[junc.id]) {
+                MapController.junctionMarkers[junc.id].openPopup();
+              }
+              return;
+            }
+            const hosp = TrichyMockDB.hospitals.find(h => h.name.toLowerCase().includes(val));
+            if (hosp) {
+              MapController.panTo(hosp.lat, hosp.lng, 16);
+              return;
+            }
+            alert(`No direct match found for "${val}". Searching Challans...`);
+            document.querySelector('[data-view=challans-view]').click();
+            document.getElementById('challanSearchInput').value = val;
+            ChallanManager.currentSearchQuery = val;
+            ChallanManager.renderChallans();
+          }
+        });
+      }
+
+      // Populate prediction junctions dropdown
+      const predSelect = document.getElementById('predJunction');
+      if (predSelect) {
+        predSelect.innerHTML = TrichyMockDB.junctions.map(j => `<option value="${j.id}">${j.name}</option>`).join('');
+      }
+
+      // Disaster mode toggle
+      document.getElementById('disasterModeToggleBtn').addEventListener('click', () => {
+        toggleDisasterMode(true);
+      });
+    });
+
+    function updateDashboardCounters() {
+      TrichyAPI.getDashboardStats().then(stats => {
+        animateValue("counterJunctions", 0, stats.liveJunctions, 800);
+        animateValue("counterIncidents", 0, stats.activeIncidents, 800);
+        animateValue("counterCongestion", 0, stats.heavyTrafficRoads, 800);
+        animateValue("counterEmergency", 0, stats.emergencyVehicles, 800);
+        animateValue("counterRoadBlocks", 0, stats.activeRoadBlocks, 800);
+        animateValue("counterChallans", 0, stats.pendingChallans, 800);
+      });
+    }
+
+    function animateValue(id, start, end, duration) {
+      const obj = document.getElementById(id);
+      if (!obj) return;
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+      window.requestAnimationFrame(step);
+    }
+
+    function renderOverviewJunctions() {
+      const tbody = document.getElementById('junctionsOverviewTableBody');
+      const fullTbody = document.getElementById('junctionsFullTableBody');
+      const junctions = TrichyMockDB.junctions;
+
+      if (tbody) {
+        tbody.innerHTML = junctions.map(j => `
+          <tr>
+            <td><b>J${j.id}</b></td>
+            <td><b>${j.name}</b></td>
+            <td><span style="font-size: 0.74rem; color: #9ca3af;">${j.landmark}</span></td>
+            <td><span class="status-badge badge-${j.trafficDensity.toLowerCase()}">${j.trafficDensity}</span></td>
+            <td><b>${j.vpm}</b> vpm</td>
+            <td><span style="color: #60a5fa;">${j.currentPhase}</span></td>
+            <td>🟢 ${j.greenTime}s | 🔴 ${j.redTime}s</td>
+            <td><span style="color: ${j.congestionIndex > 3.5 ? '#ef4444' : '#10b981'}; font-weight: 700;">${j.congestionIndex}</span></td>
+            <td>
+              <button class="btn-secondary-trichy" style="padding: 3px 8px; font-size: 0.72rem;" onclick="SignalPlanner.openModal(${j.id})">
+                <i class="fa fa-sliders-h"></i> Optimize
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      if (fullTbody) {
+        fullTbody.innerHTML = junctions.map(j => `
+          <tr>
+            <td><b>${j.name}</b><br><span style="font-size: 0.72rem; color: #9ca3af;">${j.landmark}</span></td>
+            <td><code>${j.lat}, ${j.lng}</code></td>
+            <td>
+              <span style="color: #38bdf8;">N:${j.northFlow}</span> | 
+              <span style="color: #34d399;">S:${j.southFlow}</span> | 
+              <span style="color: #fbbf24;">E:${j.eastFlow}</span> | 
+              <span style="color: #f87171;">W:${j.westFlow}</span>
+            </td>
+            <td>${j.currentPhase}</td>
+            <td><b>${j.greenTime}s</b></td>
+            <td><span class="status-badge badge-${j.trafficDensity.toLowerCase()}">${j.trafficDensity}</span></td>
+            <td>
+              <button class="btn-primary-trichy" style="padding: 4px 10px; font-size: 0.75rem;" onclick="SignalPlanner.openModal(${j.id})">
+                <i class="fa fa-cog"></i> Plan Signal
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function renderHospitalCards() {
+      const container = document.getElementById('hospitalsCardsGrid');
+      if (!container) return;
+
+      container.innerHTML = TrichyMockDB.hospitals.map(h => `
+        <div class="col-md-4">
+          <div class="glass-panel p-3" style="border-top: 3px solid #2563eb;">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <b style="color: #fff; font-size: 0.95rem;">${h.name}</b>
+              <span class="status-badge badge-${h.status === 'AVAILABLE' ? 'normal' : 'heavy'}">${h.status}</span>
+            </div>
+            <div style="font-size: 0.76rem; color: #9ca3af; margin-bottom: 8px;"><i class="fa fa-map-marker-alt text-warning"></i> ${h.location}</div>
+            <div style="font-size: 0.8rem; color: #d1d5db; margin-bottom: 4px;">Emergency Beds: <b>${h.occupied} / ${h.capacity} occupied</b></div>
+            <div style="font-size: 0.76rem; color: #38bdf8; margin-bottom: 12px;"><i class="fa fa-phone"></i> ${h.contact}</div>
+            <button class="btn-green-trichy w-100 justify-content-center" onclick="GreenCorridor.selectDestinationHospital(${h.id})">
+              <i class="fa fa-ambulance"></i> Priority Route Here
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function runTrafficPrediction() {
+      const junctionId = document.getElementById('predJunction').value;
+      const day = document.getElementById('predDay').value;
+      const time = document.getElementById('predTime').value;
+      const weather = document.getElementById('predWeather').value;
+      const event = document.getElementById('predEvent').value;
+
+      const res = TrichyAPI.predictTraffic({ junctionId, day, time, weather, event });
+      const container = document.getElementById('predOutputContainer');
+
+      container.innerHTML = `
+        <div class="glass-panel p-3 mb-3" style="border-left: 5px solid ${res.color};">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span style="font-size: 0.75rem; color: #9ca3af; text-transform: uppercase;">Predicted Congestion</span>
+              <h3 style="color: ${res.color}; font-weight: 800; margin: 4px 0;">${res.level} TRAFFIC</h3>
+            </div>
+            <div class="text-end">
+              <span class="tricolour-pill">${res.confidence}</span>
+              <div style="font-size: 0.8rem; color: #fff; margin-top: 4px;">Expected Flow: <b>${res.expectedVpm} vpm</b></div>
+            </div>
+          </div>
+          <div style="font-size: 0.82rem; color: #d1d5db; margin-top: 10px;">
+            <b>Evaluated For:</b> ${res.junctionName} • ${res.day} at ${res.time}
+          </div>
+        </div>
+
+        <div class="glass-panel p-3 mb-3">
+          <b style="font-size: 0.82rem; color: #fff;">Key Contributing Factors (Transparent Rules):</b>
+          <ul style="margin: 6px 0 0 18px; font-size: 0.78rem; color: #9ca3af;">
+            ${res.keyFactors.map(f => `<li>${f}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div class="glass-panel p-3" style="border: 1px solid var(--saffron);">
+          <b style="font-size: 0.82rem; color: var(--saffron);"><i class="fa fa-lightbulb"></i> Recommended Traffic Police Action:</b>
+          <div style="font-size: 0.8rem; color: #fff; margin-top: 4px;">${res.recommendation}</div>
+        </div>
+      `;
+    }
+
+    function toggleDisasterMode(activate) {
+      const banner = document.getElementById('disasterModeBanner');
+      if (activate) {
+        banner.style.display = 'flex';
+        TrichyAPI.addNotification("Disaster Traffic Mode Activated", "Emergency flood diversions enforced along Cauvery banks. Srirangam bypass active.", "EMERGENCY");
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>

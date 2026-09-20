@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRICHYFLOW — Trichy City Traffic Control Command Centre</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    /* Full-screen Indian Tricolour Background */
+    body.login-page {
+      background: radial-gradient(circle at 10% 20%, rgba(255, 153, 51, 0.22) 0%, transparent 45%),
+                  radial-gradient(circle at 90% 85%, rgba(19, 136, 8, 0.22) 0%, transparent 45%),
+                  linear-gradient(135deg, #050C1A 0%, #0A1122 50%, #060E1E 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Ambient Road Flow Lights */
+    .road-light-beam-1 {
+      position: absolute;
+      top: -20%;
+      left: 15%;
+      width: 4px;
+      height: 140%;
+      background: linear-gradient(180deg, transparent, var(--saffron), transparent);
+      opacity: 0.15;
+      transform: rotate(35deg);
+      animation: floatParticles 8s ease-in-out infinite;
+    }
+
+    .road-light-beam-2 {
+      position: absolute;
+      bottom: -20%;
+      right: 18%;
+      width: 4px;
+      height: 140%;
+      background: linear-gradient(180deg, transparent, var(--india-green), transparent);
+      opacity: 0.15;
+      transform: rotate(35deg);
+      animation: floatParticles 10s ease-in-out infinite reverse;
+    }
+
+    /* Subtle Rotating Ashoka Chakra in Center Background */
+    .background-chakra {
+      position: absolute;
+      width: 580px;
+      height: 580px;
+      opacity: 0.04;
+      pointer-events: none;
+      z-index: 1;
+      top: 50%;
+      left: 50%;
+      margin-top: -290px;
+      margin-left: -290px;
+    }
+
+    /* Glassmorphism Login Container */
+    .login-box {
+      width: 100%;
+      max-width: 460px;
+      background: rgba(14, 22, 44, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 36px 32px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 35px rgba(255, 153, 51, 0.12);
+      position: relative;
+      z-index: 10;
+      animation: fadeInDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .login-crest {
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 16px;
+      background: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 24px var(--saffron-glow);
+      border: 2px solid var(--saffron);
+    }
+
+    .demo-buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .demo-credential-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #9CA3AF;
+      border-radius: 8px;
+      padding: 6px 4px;
+      font-size: 0.72rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .demo-credential-btn:hover {
+      background: rgba(255, 153, 51, 0.15);
+      border-color: var(--saffron);
+      color: #fff;
+    }
+  </style>
+</head>
+<body class="login-page">
+
+  <!-- Ambient Light Beams -->
+  <div class="road-light-beam-1"></div>
+  <div class="road-light-beam-2"></div>
+
+  <!-- Subtle Rotating Ashoka Chakra Background -->
+  <div class="background-chakra animate-chakra">
+    <img src="assets/images/ashoka_chakra.svg" alt="Ashoka Chakra" style="width: 100%; height: 100%;">
+  </div>
+
+  <div class="login-box">
+    <!-- Tricolour Top Accent -->
+    <div class="tricolour-bar" style="position: absolute; top: 0; left: 0; border-radius: 16px 16px 0 0;"></div>
+
+    <div class="text-center mb-4">
+      <div class="login-crest">
+        <img src="assets/images/ashoka_chakra.svg" alt="Emblem" style="width: 48px; height: 48px;" class="animate-chakra-fast">
+      </div>
+      <div class="tricolour-pill mb-2">Government of Tamil Nadu • Police Traffic Wing</div>
+      <h3 style="font-weight: 900; letter-spacing: 0.08em; margin: 0; font-size: 1.6rem;" class="brand-title">TRICHYFLOW</h3>
+      <div style="font-size: 0.74rem; letter-spacing: 0.09em; color: #9CA3AF; text-transform: uppercase; margin-top: 4px;">
+        Trichy City Traffic Control & Decision Support Platform
+      </div>
+      <div style="font-size: 0.7rem; color: #6B7280; margin-top: 2px;">
+        "Intelligent Traffic Coordination for a Safer Trichy"
+      </div>
+    </div>
+
+    <!-- Error message alert -->
+    <div id="loginError" class="alert alert-danger py-2 px-3 mb-3 text-center" style="display: none; font-size: 0.8rem; background: rgba(239, 68, 68, 0.18); border-color: #ef4444; color: #fca5a5;"></div>
+
+    <form id="loginForm">
+      <div class="form-group mb-3">
+        <label class="form-label"><i class="fa fa-user-shield text-warning me-1"></i> Username or Service ID</label>
+        <input type="text" id="username" class="form-control-trichy" placeholder="Enter username (e.g. admin)" required>
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="form-label"><i class="fa fa-key text-info me-1"></i> Password</label>
+        <input type="password" id="password" class="form-control-trichy" placeholder="Enter password" required>
+      </div>
+
+      <div class="form-group mb-4">
+        <label class="form-label"><i class="fa fa-id-badge text-success me-1"></i> Authorized Role</label>
+        <select id="roleSelect" class="form-control-trichy" required>
+          <option value="ADMIN">System Administrator (Commissioner)</option>
+          <option value="TRAFFIC_POLICE">Traffic Police (Field Operations)</option>
+          <option value="CONTROL_ROOM" selected>Control Room Operator (Dispatch)</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-primary-trichy w-100 justify-content-center py-2" style="font-size: 0.95rem;">
+        <i class="fa fa-sign-in-alt"></i> Access Command Console
+      </button>
+    </form>
+
+    <!-- Preset Demo Logins for Instant College Evaluation -->
+    <div class="mt-4 pt-3 border-top" style="border-color: rgba(255, 255, 255, 0.08) !important;">
+      <div class="text-center" style="font-size: 0.7rem; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.06em;">
+        Quick Evaluator Demo Logins (1-Click)
+      </div>
+      <div class="demo-buttons-grid">
+        <button class="demo-credential-btn" data-user="admin" data-pass="admin123" data-role="ADMIN">
+          <i class="fa fa-shield-alt text-danger"></i><br><b>Admin</b>
+        </button>
+        <button class="demo-credential-btn" data-user="police" data-pass="police123" data-role="TRAFFIC_POLICE">
+          <i class="fa fa-user-ninja text-primary"></i><br><b>Traffic Police</b>
+        </button>
+        <button class="demo-credential-btn" data-user="control" data-pass="control123" data-role="CONTROL_ROOM">
+          <i class="fa fa-desktop text-success"></i><br><b>Control Room</b>
+        </button>
+      </div>
+      <div class="text-center mt-2" style="font-size: 0.68rem; color: #6B7280;">
+        Trichy Traffic Simulation & Decision Support • Major Project
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      AuthManager.initLogin();
+    });
+  </script>
+</body>
+</html>
