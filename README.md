@@ -52,6 +52,7 @@ trichyflow/
 │   │   │   └── DataInitializer.java                 # Auto-seeds 18 junctions, 22 roads, 6 hospitals, incidents
 │   │   ├── controller/
 │   │   │   ├── AuthController.java                  # /api/auth (Login, role verification)
+│   │   │   ├── WebAuthController.java               # Spring MVC /login, /register, /logout
 │   │   │   ├── JunctionController.java              # /api/junctions (Status & signal optimization)
 │   │   │   ├── RoadController.java                  # /api/roads (Corridor links & blockage status)
 │   │   │   ├── IncidentController.java              # /api/incidents (Accident reporting & detours)
@@ -59,17 +60,25 @@ trichyflow/
 │   │   │   ├── EmergencyController.java             # /api/emergency (Vehicles & Dijkstra route calculation)
 │   │   │   ├── ChallanController.java               # /api/challans (Violation registry & fine issuance)
 │   │   │   ├── HospitalController.java              # /api/hospitals (Emergency bed capacity)
+│   │   │   ├── AdvisoryController.java              # /api/advisories (Citizen public alerts & detours)
+│   │   │   ├── ConvoyController.java                # /api/convoy (VIP Green Wave progression schedule)
+│   │   │   ├── EcoTrafficController.java            # /api/traffic/eco-metrics (Fuel waste & CO2 reduction)
 │   │   │   ├── PredictionController.java            # /api/predictions (Congestion forecasting)
 │   │   │   └── NotificationController.java          # /api/notifications (Alert stream)
-│   │   ├── model/                                   # JPA Entities (User, Junction, Road, Hospital, etc.)
+│   │   ├── model/                                   # JPA Entities (User, Junction, Road, Hospital, Advisory, etc.)
 │   │   ├── repository/                              # Spring Data Repositories
 │   │   └── service/
 │   │       ├── SignalOptimizationService.java       # Rule-driven Webster signal optimization
 │   │       ├── RouteCalculationService.java          # Dijkstra graph algorithm with dynamic weights
+│   │       ├── ConvoyService.java                    # VIP Green Wave synchronized signal progression
+│   │       ├── EcoTrafficService.java                # Idle fuel consumption & CO2 footprint estimator
 │   │       └── PredictionService.java                # Transparent rule-based prediction engine
 │   └── src/main/resources/
 │       ├── application.properties                   # Default embedded zero-configuration profile
 │       ├── application-mysql.properties             # Native MySQL database connection profile
+│       ├── templates/                               # Java Thymeleaf server-rendered pages
+│       │   ├── login.html                           # Java Login portal with Indian Tricolour & Chakra
+│       │   └── register.html                        # Java Officer / Operator registration page
 │       └── static/                                  # Packaged frontend web assets
 ├── frontend/
 │   ├── index.html                                   # Indian Tricolour login with rotating Ashoka Chakra
@@ -180,7 +189,11 @@ The frontend connects smoothly to both local and cloud environments:
 
 | Endpoint | Method | Description |
 | :--- | :---: | :--- |
+| `/login` | `GET` / `POST` | Java Spring MVC server-side login portal with Indian Tricolour theme |
+| `/register` | `GET` / `POST` | Java server-side officer & operator account registration in database |
+| `/logout` | `GET` | Clear Java session and return to login portal |
 | `/api/auth/login` | `POST` | Authenticate user credentials and return role token |
+| `/api/auth/register` | `POST` | Register new user via REST endpoint with BCrypt hashing |
 | `/api/junctions` | `GET` | Retrieve all 18 Trichy monitored junctions |
 | `/api/junctions/{id}/optimize-signal` | `GET` | Compute adaptive Webster signal plan for junction |
 | `/api/junctions/{id}/apply-plan` | `PUT` | Apply simulated signal timings to live intersection |
@@ -191,6 +204,10 @@ The frontend connects smoothly to both local and cloud environments:
 | `/api/emergency/routes/calculate` | `POST`| Compute Dijkstra green corridor and junction pre-emption |
 | `/api/challans` | `GET` / `POST`| Search violations by vehicle number or issue new e-challan |
 | `/api/hospitals` | `GET` | List Trichy hospitals and trauma bed occupancy |
+| `/api/advisories` | `GET` / `POST`| Broadcast & manage citizen traffic advisories & detours |
+| `/api/convoy/plan` | `POST`| Compute synchronized Green Wave signal progression for VIP convoys |
+| `/api/convoy/templates` | `GET`| Fetch pre-configured Trichy VIP convoy corridor templates |
+| `/api/traffic/eco-metrics` | `GET`| City-wide idle fuel waste & CO2 reduction metrics |
 | `/api/predictions/congestion` | `POST`| Generate rule-based multi-factor congestion forecast |
 | `/api/notifications` | `GET` | Stream active control room alerts |
 

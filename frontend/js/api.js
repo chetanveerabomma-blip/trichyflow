@@ -898,6 +898,162 @@ const TrichyAPI = {
     // Dispatch UI event for real-time toast
     window.dispatchEvent(new CustomEvent('trichy-notification', { detail: notif }));
     return notif;
+  },
+
+  // Citizen Advisories
+  async getAdvisories() {
+    try {
+      const res = await fetch(`${API_BASE}/advisories`);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {}
+    return [
+      {
+        id: 1,
+        title: "Cauvery River Bridge Maintenance Advisory",
+        description: "Periodic expansion joint inspection on Old Cauvery Bridge between Chathiram and Mambalasalai. Heavy vehicles diverted via Odathurai Overbridge.",
+        severity: "WARNING",
+        affectedJunctions: "Chathiram Bus Stand, Mambalasalai",
+        alternateRoute: "Odathurai Overbridge via Sanjeevi Nagar",
+        postedBy: "Trichy City Traffic Police HQ",
+        active: true
+      },
+      {
+        id: 2,
+        title: "Srirangam Temple Evening Darshan Special One-Way",
+        description: "Heavy pilgrim footfall anticipated. One-way traffic enforcement in effect on South Chitra Street and Gandhi Road.",
+        severity: "INFO",
+        affectedJunctions: "Srirangam Rajagopuram Junction",
+        alternateRoute: "Amma Mandapam Bypass",
+        postedBy: "Srirangam Traffic Police Station",
+        active: true
+      },
+      {
+        id: 3,
+        title: "TVS Tollgate National Highway Convergence Rush",
+        description: "National Highway NH-45 approach experiencing heavy volume. Light vehicles advised to divert via Crawford / Cantonment ring.",
+        severity: "CRITICAL",
+        affectedJunctions: "TVS Tollgate Junction",
+        alternateRoute: "Subramaniapuram Airport Alternate Link",
+        postedBy: "National Highway Patrol Unit 4",
+        active: true
+      }
+    ];
+  },
+
+  async createAdvisory(payload) {
+    try {
+      const res = await fetch(`${API_BASE}/advisories`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {}
+    return { ...payload, id: Date.now(), active: true, createdAt: new Date().toISOString() };
+  },
+
+  // VIP / Green Wave Convoy Synchronizer
+  async getConvoyTemplates() {
+    try {
+      const res = await fetch(`${API_BASE}/convoy/templates`);
+      if (res.ok) return await res.json();
+    } catch (e) {}
+    return [
+      {
+        id: "VIP-01",
+        name: "Airport to District Collectorate VIP Corridor",
+        description: "High-security route from Trichy International Airport via KK Nagar & TVS Tollgate to Collectorate.",
+        junctionIds: [14, 13, 7, 5, 6],
+        suggestedSpeedKmh: 45
+      },
+      {
+        id: "VIP-02",
+        name: "Central Bus Stand to Srirangam Temple Convoy",
+        description: "VIP religious delegation route through Thillai Nagar, Chathiram, and Cauvery River Bridge to Rajagopuram.",
+        junctionIds: [4, 6, 15, 3, 1, 18, 10],
+        suggestedSpeedKmh: 35
+      }
+    ];
+  },
+
+  async planConvoy(payload) {
+    try {
+      const res = await fetch(`${API_BASE}/convoy/plan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {}
+    // Simulated Green Wave fallback
+    const speed = payload.speed || 40;
+    const ids = payload.junctionIds || [14, 13, 7, 5];
+    let dist = 0;
+    const schedule = ids.map((id, index) => {
+      const stepDist = index === 0 ? 0 : 1.8;
+      dist += stepDist;
+      const etaMin = Math.round((dist / speed) * 60);
+      return {
+        stepOrder: index + 1,
+        junctionId: id,
+        junctionName: `Junction #${id}`,
+        segmentDistanceKm: stepDist,
+        cumulativeDistanceKm: Math.round(dist * 10) / 10,
+        etaTime: `T+${etaMin} min`,
+        greenWaveWindow: `T+${Math.max(0, etaMin - 1)} to T+${etaMin + 2} min`,
+        recommendedSignalPhase: "100% VIP Green Priority",
+        holdSeconds: 90
+      };
+    });
+    return {
+      convoyName: payload.convoyName || "State VIP Escort",
+      vehicleCount: payload.vehicleCount || "5 Vehicles",
+      cruiseSpeedKmh: speed,
+      totalDistanceKm: Math.round(dist * 10) / 10,
+      totalEstimatedMinutes: Math.round((dist / speed) * 60),
+      junctionCount: ids.length,
+      schedule: schedule,
+      status: "GREEN_WAVE_READY"
+    };
+  },
+
+  // Eco-Traffic & Carbon Metrics
+  async getEcoMetrics() {
+    try {
+      const res = await fetch(`${API_BASE}/traffic/eco-metrics`);
+      if (res.ok) return await res.json();
+    } catch (e) {}
+    return {
+      cityWideHourlyIdleFuelLitres: 342.5,
+      cityWideHourlyCo2Kg: 791.2,
+      dailyCo2EmissionsKg: 12659.2,
+      dailyFuelSavedLitres: 1315.2,
+      dailyCo2SavedKg: 3038.2,
+      equivalentTreesPlantedDaily: 50637,
+      optimizationDelayReductionPct: 24.0,
+      junctionRankings: [
+        { junctionName: "Central Bus Stand Junction", congestionLevel: "CRITICAL", hourlyIdleFuelLitres: 48.2, hourlyCo2Kg: 111.3, co2SavedKg: 26.7, ecoRating: "POOR — High Emissions Hotspot" },
+        { junctionName: "TVS Tollgate Junction", congestionLevel: "CRITICAL", hourlyIdleFuelLitres: 42.1, hourlyCo2Kg: 97.3, co2SavedKg: 23.3, ecoRating: "POOR — High Emissions Hotspot" },
+        { junctionName: "Chathiram Bus Stand Junction", congestionLevel: "HEAVY", hourlyIdleFuelLitres: 34.5, hourlyCo2Kg: 79.7, co2SavedKg: 19.1, ecoRating: "MODERATE — Needs Dynamic Tuning" },
+        { junctionName: "Srirangam Rajagopuram Junction", congestionLevel: "HEAVY", hourlyIdleFuelLitres: 28.6, hourlyCo2Kg: 66.1, co2SavedKg: 15.9, ecoRating: "MODERATE — Needs Dynamic Tuning" }
+      ]
+    };
+  },
+
+  // Registration
+  async registerOfficer(payload) {
+    try {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      return await res.json();
+    } catch (e) {
+      return { message: "Officer registered locally in browser simulation mode." };
+    }
   }
 };
 

@@ -41,6 +41,12 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Thymeleaf for Server-Side Rendered Java Login & Web Pages -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
         <!-- Spring Security Crypto for BCrypt Password Hashing -->
         <dependency>
             <groupId>org.springframework.security</groupId>

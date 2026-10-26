@@ -88,6 +88,17 @@
   <!-- Tricolour Accent Line -->
   <div class="tricolour-bar"></div>
 
+  <!-- Live Citizen Traffic Advisory Marquee Ticker -->
+  <div class="citizen-advisory-ticker" style="background: rgba(10, 17, 34, 0.96); border-bottom: 1px solid rgba(255, 153, 51, 0.25); padding: 6px 16px; font-size: 0.78rem; display: flex; align-items: center; gap: 12px; color: #E2E8F0; z-index: 100;">
+    <span class="badge bg-warning text-dark fw-bold px-2 py-1"><i class="fa fa-bullhorn me-1"></i> PUBLIC ADVISORY</span>
+    <marquee id="advisoryMarqueeText" scrollamount="6" style="flex: 1; color: #F8FAFC;">
+      🚨 Cauvery River Bridge Maintenance: Heavy vehicles diverted via Odathurai Overbridge | 🚩 Srirangam Temple Evening Darshan: One-way flow on South Chitra Street | ⚠️ TVS Tollgate Highway convergence: Divert via Crawford Ring
+    </marquee>
+    <button class="btn btn-sm btn-outline-warning py-0 px-2" style="font-size: 0.72rem;" onclick="document.querySelector('[data-view=\'advisories-view\']').click()">
+      <i class="fa fa-external-link-alt me-1"></i> View All
+    </button>
+  </div>
+
   <!-- Main Application Container -->
   <div class="app-container">
     
@@ -118,6 +129,17 @@
         <i class="fa fa-receipt"></i> <span>E-Challan Violations</span>
       </a>
 
+      <div class="sidebar-heading">Smart City Modules</div>
+      <a class="sidebar-item" data-view="advisories-view">
+        <i class="fa fa-bullhorn text-warning"></i> <span>Public Advisories</span>
+      </a>
+      <a class="sidebar-item" data-view="convoy-view">
+        <i class="fa fa-route text-info"></i> <span>VIP Green Wave</span>
+      </a>
+      <a class="sidebar-item" data-view="eco-view">
+        <i class="fa fa-leaf text-success"></i> <span>Eco & Carbon Metrics</span>
+      </a>
+
       <div class="sidebar-heading">Decision Support</div>
       <a class="sidebar-item" data-view="analytics-view">
         <i class="fa fa-chart-line"></i> <span>Traffic Analytics</span>
@@ -135,6 +157,9 @@
       <div class="sidebar-heading">Portal</div>
       <a href="police-dashboard.html" class="sidebar-item" style="color: #60a5fa;">
         <i class="fa fa-shield-alt"></i> <span>Police Field View</span>
+      </a>
+      <a href="/login" class="sidebar-item" style="color: #fb923c;">
+        <i class="fab fa-java"></i> <span>Java Server Portal</span>
       </a>
     </aside>
 
@@ -862,6 +887,158 @@
         </div>
       </div>
 
+      <!-- =============================================================== -->
+      <!-- VIEW 10: CITIZEN PUBLIC ADVISORIES -->
+      <!-- =============================================================== -->
+      <div id="advisories-view" class="view-panel" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h4 class="fw-bold text-white mb-1"><i class="fa fa-bullhorn text-warning me-2"></i>Citizen Traffic Advisories & Public Alerts</h4>
+            <div style="font-size: 0.8rem; color: #9CA3AF;">Official bulletins broadcast to citizens, digital variable messaging signs (VMS), and mobile users.</div>
+          </div>
+          <button class="btn-primary-trichy" onclick="document.getElementById('postAdvisoryModal').style.display='flex'">
+            <i class="fa fa-plus-circle me-1"></i> Broadcast New Advisory
+          </button>
+        </div>
+
+        <div id="advisoriesListContainer" class="row g-3">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 11: VIP / GREEN WAVE CONVOY PLANNER -->
+      <!-- =============================================================== -->
+      <div id="convoy-view" class="view-panel" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h4 class="fw-bold text-white mb-1"><i class="fa fa-route text-info me-2"></i>VIP Convoy & Green Wave Synchronizer</h4>
+            <div style="font-size: 0.8rem; color: #9CA3AF;">Multi-junction synchronized signal progression algorithm ensuring zero-delay corridor clearance for VIPs & relief convoys.</div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="glass-panel p-3">
+              <h6 class="fw-bold text-white mb-3"><i class="fa fa-sliders-h text-warning me-2"></i>Convoy Configuration</h6>
+              <form id="convoyPlanForm">
+                <div class="mb-3">
+                  <label class="form-label" style="font-size: 0.78rem; color: #CBD5E1;">Select Corridor Preset</label>
+                  <select id="convoyTemplateSelect" class="form-control-trichy">
+                    <option value="VIP-01">Airport to District Collectorate VIP Corridor</option>
+                    <option value="VIP-02">Central Bus Stand to Srirangam Temple Convoy</option>
+                    <option value="VIP-03">Golden Rock to General Hospital Relief Route</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label" style="font-size: 0.78rem; color: #CBD5E1;">Convoy Designation / Title</label>
+                  <input type="text" id="convoyNameInput" class="form-control-trichy" value="Chief Minister Official Convoy">
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-6">
+                    <label class="form-label" style="font-size: 0.78rem; color: #CBD5E1;">Cruise Speed</label>
+                    <select id="convoySpeedSelect" class="form-control-trichy">
+                      <option value="35">35 km/h (Dense City)</option>
+                      <option value="40" selected>40 km/h (Standard)</option>
+                      <option value="50">50 km/h (Expressway)</option>
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label" style="font-size: 0.78rem; color: #CBD5E1;">Escort Units</label>
+                    <input type="text" id="convoyEscortsInput" class="form-control-trichy" value="6 Vehicles">
+                  </div>
+                </div>
+
+                <button type="submit" class="btn-primary-trichy w-100 justify-content-center py-2">
+                  <i class="fa fa-sync-alt me-2"></i> Compute Green Wave Schedule
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-md-8">
+            <div id="convoyOutputPanel" class="glass-panel p-3">
+              <div class="text-center py-5 text-muted">
+                <i class="fa fa-route fa-3x mb-3 text-info opacity-50"></i>
+                <div>Select a corridor preset and click <b>Compute Green Wave Schedule</b> to simulate synchronized signal progression.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 12: ECO-TRAFFIC & CARBON REDUCTION -->
+      <!-- =============================================================== -->
+      <div id="eco-view" class="view-panel" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h4 class="fw-bold text-white mb-1"><i class="fa fa-leaf text-success me-2"></i>Green City Eco-Traffic & Carbon Emissions</h4>
+            <div style="font-size: 0.8rem; color: #9CA3AF;">Environmental impact analysis tracking idle fuel wastage and CO2 reduction achieved by Webster adaptive signal timing.</div>
+          </div>
+          <span class="badge bg-success bg-opacity-25 text-success border border-success px-3 py-2">
+            <i class="fa fa-tree me-1"></i> Net Zero City Initiative
+          </span>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-3">
+            <div class="glass-panel p-3 text-center border-start border-4 border-warning">
+              <div style="font-size: 0.72rem; color: #9CA3AF; text-transform: uppercase;">Hourly Idle Fuel Consumption</div>
+              <h3 id="ecoHourlyFuel" style="color: #F59E0B; font-weight: 800; margin: 6px 0;">--</h3>
+              <div style="font-size: 0.74rem; color: #64748B;">Litres wasted in idling</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="glass-panel p-3 text-center border-start border-4 border-danger">
+              <div style="font-size: 0.72rem; color: #9CA3AF; text-transform: uppercase;">City Daily CO2 Footprint</div>
+              <h3 id="ecoDailyCo2" style="color: #EF4444; font-weight: 800; margin: 6px 0;">--</h3>
+              <div style="font-size: 0.74rem; color: #64748B;">kg CO2 across 18 junctions</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="glass-panel p-3 text-center border-start border-4 border-success">
+              <div style="font-size: 0.72rem; color: #9CA3AF; text-transform: uppercase;">Daily CO2 Reduced via AI</div>
+              <h3 id="ecoDailySaved" style="color: #10B981; font-weight: 800; margin: 6px 0;">--</h3>
+              <div style="font-size: 0.74rem; color: #10B981;">Saved by adaptive signals</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="glass-panel p-3 text-center border-start border-4 border-info">
+              <div style="font-size: 0.72rem; color: #9CA3AF; text-transform: uppercase;">Equivalent Trees Planted</div>
+              <h3 id="ecoTrees" style="color: #38BDF8; font-weight: 800; margin: 6px 0;">--</h3>
+              <div style="font-size: 0.74rem; color: #64748B;">Daily carbon offset equiv.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-panel p-3">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold text-white mb-0"><i class="fa fa-chart-bar text-warning me-2"></i>Junction Carbon Emissions Ranking (Highest to Lowest)</h6>
+            <span style="font-size: 0.75rem; color: #9CA3AF;">Updates with live traffic volume</span>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0" style="font-size: 0.82rem; background: transparent;">
+              <thead>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.12); color: #9CA3AF;">
+                  <th>Junction Name</th>
+                  <th>Congestion Level</th>
+                  <th>Hourly Idle Fuel (L)</th>
+                  <th>Hourly CO2 (kg)</th>
+                  <th>CO2 Saved via Tuning</th>
+                  <th>Environmental Rating</th>
+                </tr>
+              </thead>
+              <tbody id="ecoRankingsTableBody">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -993,6 +1170,60 @@
     </div>
   </div>
 
+  <!-- 3. Broadcast Citizen Advisory Modal -->
+  <div id="postAdvisoryModal" class="modal-overlay">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h5 style="font-weight: 800; color: #fff; margin: 0;"><i class="fa fa-bullhorn text-warning me-2"></i> Broadcast Citizen Advisory</h5>
+        <button onclick="document.getElementById('postAdvisoryModal').style.display='none'" style="background: none; border: none; color: #9ca3af; font-size: 1.2rem; cursor: pointer;"><i class="fa fa-times"></i></button>
+      </div>
+
+      <form id="postAdvisoryForm">
+        <div class="form-group mb-2">
+          <label class="form-label">Advisory Headline / Title</label>
+          <input type="text" id="advTitle" class="form-control-trichy" placeholder="e.g. Cauvery River Bridge Maintenance Detour" required>
+        </div>
+
+        <div class="row g-2 mb-2">
+          <div class="col-6 form-group">
+            <label class="form-label">Severity Level</label>
+            <select id="advSeverity" class="form-control-trichy">
+              <option value="INFO">INFO (General Notice)</option>
+              <option value="WARNING" selected>WARNING (Traffic Delays / Diversion)</option>
+              <option value="CRITICAL">CRITICAL (Emergency / Total Closure)</option>
+            </select>
+          </div>
+          <div class="col-6 form-group">
+            <label class="form-label">Issuing Authority</label>
+            <input type="text" id="advAuthority" class="form-control-trichy" value="Trichy Traffic Control Room">
+          </div>
+        </div>
+
+        <div class="form-group mb-2">
+          <label class="form-label">Affected Corridors / Junctions</label>
+          <input type="text" id="advJunctions" class="form-control-trichy" placeholder="e.g. Chathiram Bus Stand, Mambalasalai" required>
+        </div>
+
+        <div class="form-group mb-2">
+          <label class="form-label">Recommended Alternate Route</label>
+          <input type="text" id="advAlternate" class="form-control-trichy" placeholder="e.g. Odathurai Overbridge via Sanjeevi Nagar">
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label">Detailed Citizen Instructions</label>
+          <textarea id="advDescription" class="form-control-trichy" rows="3" placeholder="Provide clear instructions for motorists, buses, and freight vehicles..."></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn-secondary-trichy" onclick="document.getElementById('postAdvisoryModal').style.display='none'">Cancel</button>
+          <button type="submit" class="btn-primary-trichy">
+            <i class="fa fa-broadcast-tower me-1"></i> Publish Live Advisory
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <!-- Leaflet GIS JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1034,6 +1265,7 @@
       IncidentManager.renderIncidentTable();
       IncidentManager.renderRoadBlockTable();
       updateDashboardCounters();
+      loadCitizenAdvisories();
 
       // 5. Sidebar view switcher
       document.querySelectorAll('.sidebar-item[data-view]').forEach(item => {
@@ -1051,6 +1283,10 @@
             // Lazy initialize analytics charts
             if (targetView === 'analytics-view') {
               AnalyticsCharts.init();
+            } else if (targetView === 'advisories-view') {
+              loadCitizenAdvisories();
+            } else if (targetView === 'eco-view') {
+              loadEcoMetrics();
             }
             // Trigger leaflet map recalculation
             if (MapController.map) {
@@ -1059,6 +1295,24 @@
           }
         });
       });
+
+      // Convoy Planner Form listener
+      const convoyForm = document.getElementById('convoyPlanForm');
+      if (convoyForm) {
+        convoyForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          runConvoyCalculation();
+        });
+      }
+
+      // Citizen Advisory Form listener
+      const advForm = document.getElementById('postAdvisoryForm');
+      if (advForm) {
+        advForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          submitAdvisory();
+        });
+      }
 
       // 6. Global Search functionality
       const searchBox = document.getElementById('globalSearchInput');
@@ -1245,6 +1499,152 @@
         TrichyAPI.addNotification("Disaster Traffic Mode Activated", "Emergency flood diversions enforced along Cauvery banks. Srirangam bypass active.", "EMERGENCY");
       } else {
         banner.style.display = 'none';
+      }
+    }
+
+    // Citizen Advisories Functions
+    async function loadCitizenAdvisories() {
+      const advisories = await TrichyAPI.getAdvisories();
+      const container = document.getElementById('advisoriesListContainer');
+      const marquee = document.getElementById('advisoryMarqueeText');
+
+      if (marquee && advisories.length > 0) {
+        marquee.innerHTML = advisories.map(a => {
+          const icon = a.severity === 'CRITICAL' ? '🚨' : (a.severity === 'WARNING' ? '⚠️' : 'ℹ️');
+          return `<b>${icon} ${a.title}:</b> ${a.description} (Detour: ${a.alternateRoute || 'None'})`;
+        }).join(' &nbsp;&bull;&nbsp; ');
+      }
+
+      if (container) {
+        container.innerHTML = advisories.map(a => {
+          const borderClr = a.severity === 'CRITICAL' ? '#ef4444' : (a.severity === 'WARNING' ? '#f59e0b' : '#38bdf8');
+          const badgeClass = a.severity === 'CRITICAL' ? 'bg-danger' : (a.severity === 'WARNING' ? 'bg-warning text-dark' : 'bg-info text-dark');
+          return `
+            <div class="col-md-6">
+              <div class="glass-panel p-3 h-100" style="border-top: 4px solid ${borderClr};">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h6 class="fw-bold text-white mb-0">${a.title}</h6>
+                  <span class="badge ${badgeClass}">${a.severity}</span>
+                </div>
+                <div style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 8px;">${a.description}</div>
+                <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px;">
+                  <i class="fa fa-map-marker-alt text-warning me-1"></i> <b>Affected:</b> ${a.affectedJunctions || 'City-wide'}
+                </div>
+                <div style="font-size: 0.75rem; color: #34d399; margin-bottom: 8px;">
+                  <i class="fa fa-directions me-1"></i> <b>Alternate Detour:</b> ${a.alternateRoute || 'Standard diversions apply'}
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top border-secondary border-opacity-25" style="font-size: 0.72rem; color: #64748b;">
+                  <span><i class="fa fa-user-shield me-1"></i> ${a.postedBy || 'Traffic Police HQ'}</span>
+                  <span class="text-success"><i class="fa fa-check-circle me-1"></i> Active Broadcast</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    async function submitAdvisory() {
+      const title = document.getElementById('advTitle').value.trim();
+      const severity = document.getElementById('advSeverity').value;
+      const affectedJunctions = document.getElementById('advJunctions').value.trim();
+      const alternateRoute = document.getElementById('advAlternate').value.trim();
+      const description = document.getElementById('advDescription').value.trim();
+      const postedBy = document.getElementById('advAuthority').value.trim();
+
+      const newAdv = await TrichyAPI.createAdvisory({
+        title, severity, affectedJunctions, alternateRoute, description, postedBy
+      });
+
+      document.getElementById('postAdvisoryModal').style.display = 'none';
+      document.getElementById('postAdvisoryForm').reset();
+      TrichyAPI.addNotification(`New Public Advisory: ${title}`, description, severity === 'CRITICAL' ? 'EMERGENCY' : 'INFO');
+      loadCitizenAdvisories();
+      alert('Citizen Advisory broadcast live successfully across Trichy digital displays!');
+    }
+
+    // VIP Green Wave Functions
+    async function runConvoyCalculation() {
+      const templateId = document.getElementById('convoyTemplateSelect').value;
+      const convoyName = document.getElementById('convoyNameInput').value.trim();
+      const speed = parseFloat(document.getElementById('convoySpeedSelect').value) || 40;
+      const vehicleCount = document.getElementById('convoyEscortsInput').value.trim();
+
+      let junctionIds = [14, 13, 7, 5, 6];
+      if (templateId === 'VIP-02') junctionIds = [4, 6, 15, 3, 1, 18, 10];
+      if (templateId === 'VIP-03') junctionIds = [12, 7, 5, 6];
+
+      const res = await TrichyAPI.planConvoy({ junctionIds, speed, convoyName, vehicleCount });
+      const container = document.getElementById('convoyOutputPanel');
+
+      container.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+          <div>
+            <span class="badge bg-info text-dark fw-bold mb-1"><i class="fa fa-check-circle me-1"></i> GREEN WAVE SYNCHRONIZED</span>
+            <h5 class="fw-bold text-white mb-0">${res.convoyName} (${res.vehicleCount})</h5>
+          </div>
+          <div class="text-end">
+            <span style="font-size: 0.75rem; color: #94a3b8;">Total Corridor Distance:</span>
+            <div style="font-size: 1.1rem; font-weight: 800; color: #38bdf8;">${res.totalDistanceKm} km (${res.totalEstimatedMinutes} mins)</div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-dark table-sm align-middle mb-3" style="font-size: 0.78rem;">
+            <thead>
+              <tr style="color: #94a3b8;">
+                <th>#</th>
+                <th>Junction Node</th>
+                <th>Distance</th>
+                <th>Arrival ETA</th>
+                <th>Green Wave Window</th>
+                <th>Signal Directive</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${res.schedule.map(s => `
+                <tr>
+                  <td><span class="badge bg-secondary">${s.stepOrder}</span></td>
+                  <td><b>${s.junctionName}</b></td>
+                  <td>${s.segmentDistanceKm} km</td>
+                  <td><b style="color: #fbbf24;">${s.etaTime}</b></td>
+                  <td><span class="badge bg-success bg-opacity-25 text-success border border-success">${s.greenWaveWindow}</span></td>
+                  <td><span style="color: #38bdf8;"><i class="fa fa-shield-alt me-1"></i> Hold Green (${s.holdSeconds}s)</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="p-2 glass-panel" style="border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.78rem; color: #cbd5e1;">
+          <i class="fa fa-info-circle text-info me-1"></i> <b>Controller Command:</b> Signals along this progression will automatically hold green during the clearance window and resume adaptive Webster split upon convoy tail clearance.
+        </div>
+      `;
+    }
+
+    // Eco-Traffic & Emissions Functions
+    async function loadEcoMetrics() {
+      const data = await TrichyAPI.getEcoMetrics();
+      document.getElementById('ecoHourlyFuel').innerText = `${data.cityWideHourlyIdleFuelLitres} L/hr`;
+      document.getElementById('ecoDailyCo2').innerText = `${data.dailyCo2EmissionsKg} kg`;
+      document.getElementById('ecoDailySaved').innerText = `${data.dailyCo2SavedKg} kg`;
+      document.getElementById('ecoTrees').innerText = `${data.equivalentTreesPlantedDaily.toLocaleString()}`;
+
+      const tbody = document.getElementById('ecoRankingsTableBody');
+      if (tbody && data.junctionRankings) {
+        tbody.innerHTML = data.junctionRankings.map(j => {
+          const badgeClass = j.congestionLevel === 'CRITICAL' ? 'bg-danger' : (j.congestionLevel === 'HEAVY' ? 'bg-warning text-dark' : 'bg-info text-dark');
+          return `
+            <tr>
+              <td><b>${j.junctionName}</b></td>
+              <td><span class="badge ${badgeClass}">${j.congestionLevel}</span></td>
+              <td>${j.hourlyIdleFuelLitres} L</td>
+              <td><b style="color: #f87171;">${j.hourlyCo2Kg} kg</b></td>
+              <td><span style="color: #34d399;">-${j.co2SavedKg} kg (-24%)</span></td>
+              <td><span class="small text-muted">${j.ecoRating}</span></td>
+            </tr>
+          `;
+        }).join('');
       }
     }
   </script>

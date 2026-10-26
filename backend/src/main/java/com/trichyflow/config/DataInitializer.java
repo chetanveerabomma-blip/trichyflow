@@ -21,6 +21,7 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired private EmergencyVehicleRepository emergencyVehicleRepository;
     @Autowired private ChallanRepository challanRepository;
     @Autowired private TrafficNotificationRepository notificationRepository;
+    @Autowired private AdvisoryRepository advisoryRepository;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -167,6 +168,42 @@ public class DataInitializer implements CommandLineRunner {
             notificationRepository.save(new TrafficNotification(3L, "High Congestion Warning: TVS Tollgate", "Vehicular queue extends over 1.2 km on NH-45 approach. Signal timing recommendation generated (+15s East-West).", "CONGESTION", "HIGH", false));
             notificationRepository.save(new TrafficNotification(4L, "Road Block Notice: Thillai Nagar 1st Cross", "UGD pipe laying active. Diversion in place via Karur Bypass Road.", "WARNING", "NORMAL", true));
             notificationRepository.save(new TrafficNotification(5L, "Weather Alert: Heavy Downpour Imminent", "Regional Met Centre issues heavy rain forecast for Trichy Corporation. Low-lying subways monitored.", "INFO", "NORMAL", true));
+        }
+
+        // 10. Seed Citizen Advisories
+        if (advisoryRepository.count() == 0) {
+            advisoryRepository.save(new Advisory(
+                "Cauvery River Bridge Maintenance Advisory",
+                "Periodic expansion joint inspection on Old Cauvery Bridge between Chathiram and Mambalasalai. Heavy commercial vehicles and multi-axle trucks are advised to take the Odathurai Overbridge detour.",
+                "WARNING",
+                "Chathiram Bus Stand, Mambalasalai",
+                "Odathurai Overbridge via Sanjeevi Nagar",
+                "Trichy City Traffic Police HQ"
+            ));
+            advisoryRepository.save(new Advisory(
+                "Srirangam Ranganathaswamy Temple Special Flow",
+                "Heavy pilgrim footfall anticipated for evening darshan. One-way traffic system enforced on South Chitra Street and Gandhi Road.",
+                "INFO",
+                "Srirangam Rajagopuram Junction",
+                "Amma Mandapam Bypass",
+                "Srirangam Traffic Police Station"
+            ));
+            advisoryRepository.save(new Advisory(
+                "TVS Tollgate Highway Convergence Congestion Alert",
+                "Madurai-Chennai National Highway approach experiencing heavy vehicular volume due to holiday return rush. Light motor vehicles are encouraged to divert via Crawford / Cantonment ring.",
+                "CRITICAL",
+                "TVS Tollgate Junction",
+                "Subramaniapuram Airport Alternate Link",
+                "National Highway Patrol Unit 4"
+            ));
+            advisoryRepository.save(new Advisory(
+                "Monsoon Waterlogging Warning: Palakkarai Subway",
+                "Heavy thunderstorm warning. Caution advised near Palakkarai rail underpass. Pumps deployed and running continuously.",
+                "WARNING",
+                "Palakkarai Junction",
+                "Good Shed Road Overbridge",
+                "Trichy Corporation Disaster Response"
+            ));
         }
     }
 }

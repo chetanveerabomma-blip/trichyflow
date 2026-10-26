@@ -64,5 +64,36 @@ public class AuthController {
 
         return ResponseEntity.status(401).body(Map.of("message", "Invalid username or password."));
     }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody Map<String, String> payload) {
+        String username = payload.get("username");
+        String password = payload.get("password");
+        String fullName = payload.get("fullName");
+        String role = payload.get("role");
+        String badgeNumber = payload.get("badgeNumber");
+        String email = payload.get("email");
+        String phone = payload.get("phone");
+
+        if (username == null || password == null || role == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Username, password and role are required."));
+        }
+
+        if (userRepository.findByUsername(username.trim()).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Username is already registered."));
+        }
+
+        String encoded = passwordEncoder.encode(password);
+        User user = new User(username.trim(), encoded, fullName, role.toUpperCase(), badgeNumber, email, phone);
+        User saved = userRepository.save(user);
+
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("id", saved.getId());
+        resp.put("username", saved.getUsername());
+        resp.put("fullName", saved.getFullName());
+        resp.put("role", saved.getRole());
+        resp.put("message", "User registered successfully in TrichyFlow database.");
+        return ResponseEntity.ok(resp);
+    }
 }
 
